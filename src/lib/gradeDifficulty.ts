@@ -1,0 +1,159 @@
+type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+
+type AccidentalBreadth =
+	| "none"
+	| "rare"
+	| "passing"
+	| "occasional"
+	| "regular"
+	| "chromatic"
+	| "frequent"
+	| "modulation";
+
+// §5 difficulty table, machine-usable. One place to tune.
+// maxLeapScaleSteps follows generateMelody's unit (a 3rd = 2).
+// shortestNoteSixteenths is the smallest rhythmic grid unit (quarter = 4).
+type GradeParams = {
+	bars: [number, number]; // inclusive min/max
+	timeSignatures: string[];
+	maxKeyAccidentals: number; // sharps-or-flats in the written key
+	shortestNoteSixteenths: number;
+	maxLeapScaleSteps: number;
+	tempoBpm: [number, number]; // inclusive min/max
+	dynamics: string[];
+	articulations: string[];
+	accidentals: AccidentalBreadth;
+	restProbability: number; // 0..1
+};
+
+export const gradeDifficulty: Record<Grade, GradeParams> = {
+	1: {
+		bars: [4, 8],
+		timeSignatures: ["4/4", "3/4"],
+		maxKeyAccidentals: 1,
+		shortestNoteSixteenths: 4,
+		maxLeapScaleSteps: 2,
+		tempoBpm: [60, 80],
+		dynamics: ["f", "p"],
+		articulations: [],
+		accidentals: "none",
+		restProbability: 0.1,
+	},
+	2: {
+		bars: [8, 8],
+		timeSignatures: ["4/4", "3/4", "2/4"],
+		maxKeyAccidentals: 2,
+		shortestNoteSixteenths: 2,
+		maxLeapScaleSteps: 3,
+		tempoBpm: [70, 90],
+		dynamics: ["p", "mp", "mf", "f"],
+		articulations: ["slur"],
+		accidentals: "rare",
+		restProbability: 0.15,
+	},
+	3: {
+		bars: [8, 12],
+		timeSignatures: ["4/4", "3/4", "2/4", "6/8"],
+		maxKeyAccidentals: 3,
+		shortestNoteSixteenths: 2,
+		maxLeapScaleSteps: 4,
+		tempoBpm: [80, 100],
+		dynamics: ["p", "mp", "mf", "f", "cresc", "dim"],
+		articulations: ["slur", "staccato"],
+		accidentals: "passing",
+		restProbability: 0.2,
+	},
+	4: {
+		bars: [12, 12],
+		timeSignatures: ["4/4", "3/4", "2/4", "6/8", "3/8"],
+		maxKeyAccidentals: 4,
+		shortestNoteSixteenths: 2,
+		maxLeapScaleSteps: 5,
+		tempoBpm: [80, 108],
+		dynamics: ["p", "mp", "mf", "f", "cresc", "dim"],
+		articulations: ["slur", "staccato", "accent", "tenuto"],
+		accidentals: "occasional",
+		restProbability: 0.25,
+	},
+	5: {
+		bars: [12, 16],
+		timeSignatures: ["4/4", "3/4", "2/4", "6/8", "3/8", "2/2", "9/8"],
+		maxKeyAccidentals: 5,
+		shortestNoteSixteenths: 1,
+		maxLeapScaleSteps: 7,
+		tempoBpm: [90, 120],
+		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
+		articulations: ["slur", "staccato", "accent", "tenuto"],
+		accidentals: "regular",
+		restProbability: 0.3,
+	},
+	6: {
+		bars: [16, 16],
+		timeSignatures: [
+			"4/4",
+			"3/4",
+			"2/4",
+			"6/8",
+			"3/8",
+			"2/2",
+			"9/8",
+			"12/8",
+			"5/4",
+		],
+		maxKeyAccidentals: 6,
+		shortestNoteSixteenths: 1,
+		maxLeapScaleSteps: 8,
+		tempoBpm: [100, 132],
+		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
+		articulations: ["slur", "staccato", "accent", "tenuto"],
+		accidentals: "chromatic",
+		restProbability: 0.35,
+	},
+	7: {
+		bars: [16, 20],
+		timeSignatures: [
+			"4/4",
+			"3/4",
+			"2/4",
+			"6/8",
+			"3/8",
+			"2/2",
+			"9/8",
+			"12/8",
+			"5/4",
+			"7/8",
+		],
+		maxKeyAccidentals: 7,
+		shortestNoteSixteenths: 1,
+		maxLeapScaleSteps: 9,
+		tempoBpm: [100, 144],
+		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
+		articulations: ["slur", "staccato", "accent", "tenuto"],
+		accidentals: "frequent",
+		restProbability: 0.4,
+	},
+	8: {
+		bars: [20, 24],
+		timeSignatures: [
+			"4/4",
+			"3/4",
+			"2/4",
+			"6/8",
+			"3/8",
+			"2/2",
+			"9/8",
+			"12/8",
+			"5/4",
+			"7/8",
+			"5/8",
+		],
+		maxKeyAccidentals: 7,
+		shortestNoteSixteenths: 1,
+		maxLeapScaleSteps: 10,
+		tempoBpm: [100, 144],
+		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
+		articulations: ["slur", "staccato", "accent", "tenuto"],
+		accidentals: "modulation",
+		restProbability: 0.4,
+	},
+};

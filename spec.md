@@ -149,7 +149,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] `[manual]` The settings panel renders, every control updates state, and choices survive a page reload.
 
 ### Slice 4 — Difficulty + richer generation (§4, §5)
-- [ ] `[test]` Grade→difficulty config object keyed 1–8 (§5).
+- [x] `[test]` Grade→difficulty config object keyed 1–8 (§5).
 - [ ] `[test]` Generator consumes grade params (bars, time-sig set, key range, shortest note, max leap, tempo). **Done:** output respects each grade's constraints; tested per grade.
 - [ ] `[test]` Leap-resolution rule: step in the opposite direction after a leap larger than a third.
 - [ ] `[test]` Phrase structure + repetition/sequence schemes (AABA, diatonic sequence, vary), grade-selected.
