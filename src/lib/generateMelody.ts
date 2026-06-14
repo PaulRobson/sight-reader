@@ -1,5 +1,5 @@
 import { mulberry32 } from "./mulberry32.ts";
-import { type GeneratorOptions, pitchWalk } from "./pitchWalk.ts";
+import { type GeneratorOptions, type Pitch, pitchWalk } from "./pitchWalk.ts";
 import { rhythm } from "./rhythm.ts";
 
 export type { GeneratorOptions } from "./pitchWalk.ts";
@@ -19,26 +19,19 @@ export type Melody = {
 	notes: Note[];
 };
 
-function drawDurations(bars: number, rng: () => number): number[] {
-	const durations: number[] = [];
-	for (let b = 0; b < bars; b++) {
-		durations.push(...rhythm.draw(rhythm.cells4x4, rng).durations);
-	}
-	return durations;
+// Zip pitches with their slot durations (both must be the same length).
+export function toNotes(pitches: Pitch[], durations: number[]): Note[] {
+	return pitches.map((p, i) => ({ ...p, duration: durations[i] }));
 }
 
 export function generateMelody(opts: GeneratorOptions): Melody {
 	const rng = mulberry32(opts.seed);
-	const durations = drawDurations(opts.bars, rng);
+	const durations = rhythm.drawBars(opts.bars, rng);
 	const pitches = pitchWalk(opts, durations.length, rng);
-	const notes: Note[] = pitches.map((p, i) => ({
-		...p,
-		duration: durations[i],
-	}));
 	return {
 		key: opts.key,
 		bars: opts.bars,
 		barUnits: rhythm.barUnits4x4,
-		notes,
+		notes: toNotes(pitches, durations),
 	};
 }

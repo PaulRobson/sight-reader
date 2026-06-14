@@ -53,8 +53,16 @@ function nearest(indices: number[], target: number): number {
 	);
 }
 
-const clampIndex = (v: number, len: number) =>
+export const clampIndex = (v: number, len: number) =>
 	Math.max(0, Math.min(len - 1, v));
+
+// A bounded signed move in scale steps: a step (±1) with probability stepBias,
+// else a leap up to maxLeap. Used both inside the walk and for phrase joins.
+export function stepDelta(opts: GeneratorOptions, rng: () => number): number {
+	const isStep = rng() < opts.stepBias;
+	const magnitude = isStep ? 1 : 2 + Math.floor(rng() * (opts.maxLeap - 1));
+	return (rng() < 0.5 ? -1 : 1) * magnitude;
+}
 
 function freeMove(
 	prev: number,
@@ -62,11 +70,9 @@ function freeMove(
 	len: number,
 	rng: () => number,
 ) {
-	const isStep = rng() < opts.stepBias;
-	const magnitude = isStep ? 1 : 2 + Math.floor(rng() * (opts.maxLeap - 1));
-	const dir = rng() < 0.5 ? -1 : 1;
-	const cand = prev + magnitude * dir;
-	return cand < 0 || cand >= len ? prev - magnitude * dir : cand; // reflect inward
+	const delta = stepDelta(opts, rng);
+	const cand = prev + delta;
+	return cand < 0 || cand >= len ? prev - delta : cand; // reflect inward
 }
 
 function nextIndex(
@@ -83,7 +89,7 @@ function nextIndex(
 	return clampIndex(freeMove(prev, opts, len, rng), len);
 }
 
-function buildIndices(
+export function buildIndices(
 	count: number,
 	start: number,
 	opts: GeneratorOptions,
@@ -99,7 +105,7 @@ function buildIndices(
 }
 
 // Last note = tonic, approached by step (leading tone or supertonic).
-function finalizeCadence(indices: number[], tonics: number[]): void {
+export function finalizeCadence(indices: number[], tonics: number[]): void {
 	const n = indices.length;
 	if (n >= 3) {
 		const finalTonic = nearest(tonics, indices[n - 2]);
@@ -110,6 +116,21 @@ function finalizeCadence(indices: number[], tonics: number[]): void {
 	}
 }
 
+export type PitchSpace = {
+	pitches: Pitch[];
+	tonics: number[]; // indices of tonic pitches
+	start: number; // mid-range tonic, the walk's anchor
+};
+
+// The diatonic pitch ladder for a key/range plus its tonic anchors.
+export function pitchSpace(opts: GeneratorOptions): PitchSpace {
+	const degrees = scale.major(opts.key);
+	const pitches = buildPitches(opts.key, opts.lowestMidi, opts.highestMidi);
+	const tonics = tonicIndices(pitches, degrees[0]);
+	const start = nearest(tonics, Math.floor(pitches.length / 2));
+	return { pitches, tonics, start };
+}
+
 // Stepwise-biased diatonic walk: first note near mid-range tonic, leaps capped
 // and resolved, last note a tonic approached by step. Consumes rng in order.
 export function pitchWalk(
@@ -117,10 +138,7 @@ export function pitchWalk(
 	count: number,
 	rng: () => number,
 ): Pitch[] {
-	const degrees = scale.major(opts.key);
-	const pitches = buildPitches(opts.key, opts.lowestMidi, opts.highestMidi);
-	const tonics = tonicIndices(pitches, degrees[0]);
-	const start = nearest(tonics, Math.floor(pitches.length / 2));
+	const { pitches, tonics, start } = pitchSpace(opts);
 	const indices = buildIndices(count, start, opts, pitches.length, rng);
 	finalizeCadence(indices, tonics);
 	return indices.map((i) => pitches[i]);

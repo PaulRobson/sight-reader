@@ -29,4 +29,11 @@ export const rhythm = {
 		}
 		return cells[cells.length - 1];
 	},
+	// One drawn 4/4 cell per bar, flattened to a duration stream.
+	drawBars(bars: number, rng: Prng): number[] {
+		const durations: number[] = [];
+		for (let b = 0; b < bars; b++)
+			durations.push(...rhythm.draw(rhythm.cells4x4, rng).durations);
+		return durations;
+	},
 };

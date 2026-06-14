@@ -152,7 +152,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] `[test]` Grade→difficulty config object keyed 1–8 (§5).
 - [x] `[test]` Generator consumes grade params (bars, time-sig set, key range, shortest note, max leap, tempo). **Done:** output respects each grade's constraints; tested per grade. (`generateForGrade` derives options from `gradeDifficulty`; meter selection collapses to 4/4 until the rhythm-cells task widens it. App wiring of `settings.grade` → generation is deferred to the Slice 4 manual checkpoint.)
 - [x] `[test]` Leap-resolution rule: step in the opposite direction after a leap larger than a third.
-- [ ] `[test]` Phrase structure + repetition/sequence schemes (AABA, diatonic sequence, vary), grade-selected.
+- [x] `[test]` Phrase structure + repetition/sequence schemes (AABA, diatonic sequence, vary), grade-selected. **Done:** `generatePhrased` builds a piece from 4-bar phrases (`planPhrases.ts`); `generateForGrade` snaps the bar count to a phrase multiple (every grade's bar min/max are multiples of 4, so it stays in range) and picks the scheme via `schemeForGrade` (1–2 AABA, 3–5 sequence, 6–8 vary). Repetition is of *contour* (relative shape) joined continuously, not absolute pitch, so every interval — including phrase joins — stays within the grade's `maxLeap`; tested. Cadential/rest/time-sig/accidental breadth remain later tasks.
 - [ ] `[test]` Cadential logic: interior phrases land on degree 2 or 5, the final phrase on degree 1.
 - [ ] `[test]` Rest insertion per the grade's rest probability.
 - [ ] `[test]` Additional time signatures + their rhythm cells (3/4, 2/4, 6/8, and up per §5).
