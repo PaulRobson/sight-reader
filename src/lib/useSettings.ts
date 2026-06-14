@@ -6,7 +6,7 @@ import { storage } from "./storage.ts";
 // carry defaults until their Slice 3 controls land.
 type Mode = "melodic" | "rhythm-only";
 
-type Settings = {
+export type Settings = {
 	instrumentId: string;
 	clef: Clef;
 	grade: number;

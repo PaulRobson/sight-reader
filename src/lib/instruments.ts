@@ -2,7 +2,7 @@ export type Clef = "treble" | "bass" | "alto" | "tenor";
 
 // §2 / §6. Ranges are WRITTEN pitch in scientific pitch notation.
 // soundingOffsetSemitones is applied only at playback (§6), never to the score.
-type InstrumentDef = {
+export type InstrumentDef = {
 	id: string;
 	name: string;
 	defaultClef: Clef;
@@ -106,3 +106,19 @@ export const instruments: InstrumentDef[] = [
 		highestWrittenNote: "E6",
 	},
 ];
+
+export function findInstrument(id: string): InstrumentDef {
+	return instruments.find((i) => i.id === id) ?? instruments[0];
+}
+
+// Keep a stored clef only if the instrument supports it; otherwise its default.
+export function constrainClef(instrument: InstrumentDef, clef: Clef): Clef {
+	return instrument.clefs.includes(clef) ? clef : instrument.defaultClef;
+}
+
+// Treble + bass together = grand staff (piano), shown as one staff pair.
+export function isGrandStaff(instrument: InstrumentDef): boolean {
+	return (
+		instrument.clefs.includes("treble") && instrument.clefs.includes("bass")
+	);
+}

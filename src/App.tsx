@@ -3,7 +3,7 @@ import { AssessmentForm } from "./components/AssessmentForm.tsx";
 import { Countdown } from "./components/Countdown.tsx";
 import { ExerciseView } from "./components/ExerciseView.tsx";
 import { HistoryView } from "./components/HistoryView.tsx";
-import { InstrumentPicker } from "./components/InstrumentPicker.tsx";
+import { SettingsPanel } from "./components/SettingsPanel.tsx";
 import type { AttemptLog } from "./lib/assessment.ts";
 import { attempts } from "./lib/attempts.ts";
 import { defaultPiece } from "./lib/defaultPiece.ts";
@@ -44,10 +44,7 @@ export default function App() {
 				<p>{labels[view]}</p>
 			</section>
 			{view === "settings" ? (
-				<InstrumentPicker
-					value={settings.instrumentId}
-					onChange={(instrumentId) => update({ instrumentId })}
-				/>
+				<SettingsPanel settings={settings} update={update} />
 			) : null}
 			<ExerciseView abc={abc} />
 			{view === "prep" ? (
