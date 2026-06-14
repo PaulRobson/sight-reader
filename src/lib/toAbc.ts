@@ -63,20 +63,30 @@ function noteToken(
 	return `${prefix}${pitchLetters(note)}${length}`;
 }
 
+// One bar's tokens. An entirely-rested bar collapses to `Z` (a whole-measure
+// rest) rather than a string of individual rests. Accidentals are local to the
+// bar, so the persistence state starts fresh here.
+function renderBar(notes: Note[], keySig: Record<string, number>): string {
+	if (notes.every((n) => n.rest)) return "Z";
+	const bar: Record<string, number> = {};
+	return notes.map((n) => noteToken(n, keySig, bar)).join(" ");
+}
+
 function noteStream(key: string, barUnits: number, notes: Note[]): string {
 	const keySig = keySignature(key);
-	const parts: string[] = [];
-	let bar: Record<string, number> = {};
+	const bars: string[] = [];
+	let current: Note[] = [];
 	let acc = 0;
 	for (const note of notes) {
-		parts.push(noteToken(note, keySig, bar));
+		current.push(note);
 		acc += note.duration;
 		if (acc % barUnits === 0) {
-			bar = {}; // accidentals reset at the bar line
-			parts.push("|");
+			bars.push(renderBar(current, keySig));
+			current = [];
 		}
 	}
-	return parts.join(" ");
+	if (current.length > 0) bars.push(renderBar(current, keySig));
+	return `${bars.join(" | ")} |`;
 }
 
 // Split a single line across a grand staff: each pitched note goes to the staff

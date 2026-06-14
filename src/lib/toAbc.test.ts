@@ -123,6 +123,46 @@ describe("toAbc", () => {
 		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
 	});
 
+	it("collapses an all-rest bar to a single measure rest", () => {
+		const melody: Melody = {
+			key: "C",
+			bars: 2,
+			barUnits: 16,
+			notes: [
+				{ midi: 60, letter: "C", accidental: 0, octave: 4, duration: 16 },
+				// bar 2: only rests, of differing lengths
+				{
+					midi: 60,
+					letter: "C",
+					accidental: 0,
+					octave: 4,
+					duration: 8,
+					rest: true,
+				},
+				{
+					midi: 60,
+					letter: "C",
+					accidental: 0,
+					octave: 4,
+					duration: 4,
+					rest: true,
+				},
+				{
+					midi: 60,
+					letter: "C",
+					accidental: 0,
+					octave: 4,
+					duration: 4,
+					rest: true,
+				},
+			],
+		};
+		const abc = toAbc(melody);
+		expect(abc).toContain("Z"); // whole-bar rest
+		expect(abc).not.toMatch(/z\d/); // not a run of individual rests
+		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
+	});
+
 	it("emits z tokens for rested slots and still parses cleanly", () => {
 		const melody = generateMelody(grade1);
 		melody.notes[1] = { ...melody.notes[1], rest: true };
