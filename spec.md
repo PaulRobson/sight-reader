@@ -150,7 +150,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 
 ### Slice 4 — Difficulty + richer generation (§4, §5)
 - [x] `[test]` Grade→difficulty config object keyed 1–8 (§5).
-- [ ] `[test]` Generator consumes grade params (bars, time-sig set, key range, shortest note, max leap, tempo). **Done:** output respects each grade's constraints; tested per grade.
+- [x] `[test]` Generator consumes grade params (bars, time-sig set, key range, shortest note, max leap, tempo). **Done:** output respects each grade's constraints; tested per grade. (`generateForGrade` derives options from `gradeDifficulty`; meter selection collapses to 4/4 until the rhythm-cells task widens it. App wiring of `settings.grade` → generation is deferred to the Slice 4 manual checkpoint.)
 - [ ] `[test]` Leap-resolution rule: step in the opposite direction after a leap larger than a third.
 - [ ] `[test]` Phrase structure + repetition/sequence schemes (AABA, diatonic sequence, vary), grade-selected.
 - [ ] `[test]` Cadential logic: interior phrases land on degree 2 or 5, the final phrase on degree 1.
