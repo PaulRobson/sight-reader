@@ -126,4 +126,37 @@ describe("generatePhrased", () => {
 		expect(r.phrases).toHaveLength(1);
 		expect(r.phrases[0].connector).toBeNull();
 	});
+
+	describe("cadential logic", () => {
+		// Last-note index of each phrase: phrase note count = durations.length.
+		const phraseEnds = (phrases: { durations: number[] }[]): number[] => {
+			let pos = 0;
+			return phrases.map((s) => {
+				pos += s.durations.length;
+				return pos - 1;
+			});
+		};
+
+		// C major: degree 1 = C (pc 0), degree 2 = D (pc 2), degree 5 = G (pc 7).
+		it("lands interior phrases on degree 2 or 5", () => {
+			for (const scheme of ["AABA", "sequence", "vary"] as PhraseScheme[]) {
+				const r = generatePhrased(opts(scheme));
+				const ends = phraseEnds(r.phrases);
+				for (const e of ends.slice(0, -1))
+					expect([2, 7]).toContain(r.melody.notes[e].midi % 12);
+			}
+		});
+
+		it("resolves the final phrase to degree 1", () => {
+			for (const scheme of ["AABA", "sequence", "vary"] as PhraseScheme[]) {
+				const notes = generatePhrased(opts(scheme)).melody.notes;
+				expect(notes[notes.length - 1].midi % 12).toBe(0); // tonic C
+			}
+		});
+
+		it("leaves the single-phrase case to resolve on the tonic", () => {
+			const notes = generatePhrased(opts("AABA", { bars: 4 })).melody.notes;
+			expect(notes[notes.length - 1].midi % 12).toBe(0);
+		});
+	});
 });

@@ -37,16 +37,17 @@ function buildPitches(key: string, lo: number, hi: number): Pitch[] {
 	return pitches.sort((a, b) => a.midi - b.midi);
 }
 
-function tonicIndices(pitches: Pitch[], tonic: ScaleNote): number[] {
+// Ladder positions whose pitch is the given scale degree (matched by spelling).
+function degreeIndices(pitches: Pitch[], degree: ScaleNote): number[] {
 	const out: number[] = [];
 	pitches.forEach((p, i) => {
-		if (p.letter === tonic.letter && p.accidental === tonic.accidental)
+		if (p.letter === degree.letter && p.accidental === degree.accidental)
 			out.push(i);
 	});
 	return out;
 }
 
-function nearest(indices: number[], target: number): number {
+export function nearest(indices: number[], target: number): number {
 	return indices.reduce(
 		(best, i) => (Math.abs(i - target) < Math.abs(best - target) ? i : best),
 		indices[0],
@@ -120,15 +121,20 @@ export type PitchSpace = {
 	pitches: Pitch[];
 	tonics: number[]; // indices of tonic pitches
 	start: number; // mid-range tonic, the walk's anchor
+	cadenceTargets: number[]; // degree 2/5 indices for interior half-cadences
 };
 
-// The diatonic pitch ladder for a key/range plus its tonic anchors.
+// The diatonic pitch ladder for a key/range plus its tonic and cadence anchors.
 export function pitchSpace(opts: GeneratorOptions): PitchSpace {
 	const degrees = scale.major(opts.key);
 	const pitches = buildPitches(opts.key, opts.lowestMidi, opts.highestMidi);
-	const tonics = tonicIndices(pitches, degrees[0]);
+	const tonics = degreeIndices(pitches, degrees[0]);
 	const start = nearest(tonics, Math.floor(pitches.length / 2));
-	return { pitches, tonics, start };
+	const cadenceTargets = [
+		...degreeIndices(pitches, degrees[1]),
+		...degreeIndices(pitches, degrees[4]),
+	].sort((a, b) => a - b);
+	return { pitches, tonics, start, cadenceTargets };
 }
 
 // Stepwise-biased diatonic walk: first note near mid-range tonic, leaps capped
