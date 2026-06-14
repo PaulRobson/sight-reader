@@ -75,6 +75,26 @@ describe("rhythm.meters", () => {
 	});
 });
 
+describe("rhythm grade ramp", () => {
+	const has = (timeSig: string, duration: number) =>
+		rhythm.meters[timeSig].cells.some((c) => c.durations.includes(duration));
+
+	it("includes fine figures (sixteenths, dotted-eighths) in common meters", () => {
+		for (const timeSig of ["4/4", "3/4", "2/4", "6/8"]) {
+			expect(has(timeSig, 1), `${timeSig} sixteenth`).toBe(true);
+			expect(has(timeSig, 3), `${timeSig} dotted-eighth`).toBe(true);
+		}
+	});
+
+	it("gates fine figures by the grade's shortest note", () => {
+		const finest = (m: { cells: RhythmCell[] }) =>
+			Math.min(...m.cells.flatMap((c) => c.durations));
+		expect(finest(rhythm.restrict(rhythm.meters["4/4"], 4))).toBe(4); // quarter+
+		expect(finest(rhythm.restrict(rhythm.meters["4/4"], 2))).toBe(2); // eighths
+		expect(finest(rhythm.restrict(rhythm.meters["4/4"], 1))).toBe(1); // sixteenths
+	});
+});
+
 describe("rhythm.drawBars", () => {
 	it("fills each bar to the meter's length", () => {
 		const meter = rhythm.meters["6/8"];

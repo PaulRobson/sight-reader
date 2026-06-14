@@ -15,7 +15,10 @@ export type Meter = {
 
 const BAR_4_4 = 16;
 
-// Grade-1 appropriate: quarter is the shortest note, longer notes favoured.
+// Cells progress from longest notes to finest figures; `rhythm.restrict` drops
+// the finer ones (16ths = duration 1, dotted-eighth/sixteenth = 3+1) for grades
+// whose shortest note is coarser, so the rhythmic vocabulary grows with grade.
+// quarter = 4, eighth = 2, sixteenth = 1, dotted-quarter = 6, dotted-eighth = 3.
 const cells4x4: RhythmCell[] = [
 	{ durations: [16], weight: 1 },
 	{ durations: [8, 8], weight: 2 },
@@ -23,6 +26,17 @@ const cells4x4: RhythmCell[] = [
 	{ durations: [8, 4, 4], weight: 2 },
 	{ durations: [4, 4, 4, 4], weight: 3 },
 	{ durations: [12, 4], weight: 1 },
+	{ durations: [4, 8, 4], weight: 2 }, // syncopated half on beat 2
+	{ durations: [4, 4, 2, 2, 4], weight: 2 }, // eighths
+	{ durations: [2, 2, 4, 4, 4], weight: 2 },
+	{ durations: [4, 2, 2, 4, 4], weight: 2 },
+	{ durations: [2, 2, 2, 2, 4, 4], weight: 2 },
+	{ durations: [2, 4, 4, 4, 2], weight: 2 }, // syncopation
+	{ durations: [6, 2, 4, 4], weight: 2 }, // dotted quarter + eighth
+	{ durations: [6, 2, 6, 2], weight: 1 },
+	{ durations: [3, 1, 4, 4, 4], weight: 2 }, // dotted-eighth + sixteenth
+	{ durations: [1, 1, 1, 1, 4, 4, 4], weight: 2 }, // sixteenths
+	{ durations: [2, 1, 1, 4, 4, 4], weight: 1 },
 ];
 
 const cells3x4: RhythmCell[] = [
@@ -30,8 +44,15 @@ const cells3x4: RhythmCell[] = [
 	{ durations: [8, 4], weight: 2 },
 	{ durations: [4, 8], weight: 2 },
 	{ durations: [4, 4, 4], weight: 3 },
-	{ durations: [4, 4, 2, 2], weight: 1 },
-	{ durations: [2, 2, 4, 4], weight: 1 },
+	{ durations: [4, 4, 2, 2], weight: 2 },
+	{ durations: [2, 2, 4, 4], weight: 2 },
+	{ durations: [4, 2, 2, 4], weight: 2 },
+	{ durations: [2, 2, 2, 2, 4], weight: 2 },
+	{ durations: [6, 2, 4], weight: 2 }, // dotted
+	{ durations: [4, 6, 2], weight: 1 },
+	{ durations: [2, 4, 4, 2], weight: 2 }, // syncopation
+	{ durations: [3, 1, 4, 4], weight: 2 }, // dotted-eighth + sixteenth
+	{ durations: [1, 1, 1, 1, 4, 4], weight: 1 }, // sixteenths
 ];
 
 const cells2x4: RhythmCell[] = [
@@ -39,7 +60,12 @@ const cells2x4: RhythmCell[] = [
 	{ durations: [4, 4], weight: 3 },
 	{ durations: [4, 2, 2], weight: 2 },
 	{ durations: [2, 2, 4], weight: 2 },
-	{ durations: [2, 2, 2, 2], weight: 1 },
+	{ durations: [2, 2, 2, 2], weight: 2 },
+	{ durations: [6, 2], weight: 2 }, // dotted
+	{ durations: [2, 4, 2], weight: 2 }, // syncopation
+	{ durations: [3, 1, 4], weight: 2 }, // dotted-eighth + sixteenth
+	{ durations: [1, 1, 2, 4], weight: 1 }, // sixteenths
+	{ durations: [2, 2, 1, 1, 2], weight: 1 },
 ];
 
 // Compound: beats are dotted quarters (6 units).
@@ -49,14 +75,19 @@ const cells6x8: RhythmCell[] = [
 	{ durations: [6, 4, 2], weight: 2 },
 	{ durations: [4, 2, 6], weight: 2 },
 	{ durations: [6, 2, 2, 2], weight: 1 },
+	{ durations: [2, 2, 2, 6], weight: 1 },
 	{ durations: [2, 2, 2, 2, 2, 2], weight: 1 },
+	{ durations: [3, 1, 2, 6], weight: 2 }, // dotted-eighth + sixteenth
+	{ durations: [1, 1, 1, 1, 2, 6], weight: 1 }, // sixteenths
 ];
 
 const cells3x8: RhythmCell[] = [
 	{ durations: [6], weight: 2 },
 	{ durations: [4, 2], weight: 2 },
 	{ durations: [2, 4], weight: 2 },
-	{ durations: [2, 2, 2], weight: 1 },
+	{ durations: [2, 2, 2], weight: 2 },
+	{ durations: [3, 1, 2], weight: 2 }, // dotted-eighth + sixteenth
+	{ durations: [1, 1, 1, 1, 2], weight: 1 }, // sixteenths
 ];
 
 const cells9x8: RhythmCell[] = [
@@ -65,6 +96,7 @@ const cells9x8: RhythmCell[] = [
 	{ durations: [6, 6, 4, 2], weight: 1 },
 	{ durations: [4, 2, 6, 6], weight: 1 },
 	{ durations: [6, 4, 2, 6], weight: 1 },
+	{ durations: [3, 1, 2, 6, 6], weight: 1 }, // dotted-eighth + sixteenth
 ];
 
 const cells12x8: RhythmCell[] = [
@@ -73,6 +105,7 @@ const cells12x8: RhythmCell[] = [
 	{ durations: [6, 6, 6, 6], weight: 3 },
 	{ durations: [12, 6, 6], weight: 1 },
 	{ durations: [6, 6, 12], weight: 1 },
+	{ durations: [6, 6, 6, 3, 1, 2], weight: 1 }, // dotted-eighth + sixteenth
 ];
 
 const cells5x4: RhythmCell[] = [
@@ -80,7 +113,9 @@ const cells5x4: RhythmCell[] = [
 	{ durations: [8, 8, 4], weight: 2 },
 	{ durations: [4, 8, 8], weight: 2 },
 	{ durations: [8, 4, 4, 4], weight: 1 },
-	{ durations: [4, 4, 4, 4, 4], weight: 1 },
+	{ durations: [4, 4, 4, 4, 4], weight: 2 },
+	{ durations: [4, 4, 4, 2, 2, 4], weight: 1 }, // eighths
+	{ durations: [3, 1, 4, 4, 4, 4], weight: 1 }, // dotted-eighth + sixteenth
 ];
 
 const cells7x8: RhythmCell[] = [
@@ -89,6 +124,7 @@ const cells7x8: RhythmCell[] = [
 	{ durations: [4, 6, 4], weight: 2 },
 	{ durations: [4, 4, 6], weight: 2 },
 	{ durations: [2, 2, 2, 2, 2, 2, 2], weight: 1 },
+	{ durations: [3, 1, 4, 2, 2, 2], weight: 1 }, // dotted-eighth + sixteenth
 ];
 
 const cells5x8: RhythmCell[] = [
@@ -97,6 +133,7 @@ const cells5x8: RhythmCell[] = [
 	{ durations: [4, 6], weight: 2 },
 	{ durations: [4, 2, 2, 2], weight: 1 },
 	{ durations: [2, 2, 2, 4], weight: 1 },
+	{ durations: [3, 1, 2, 2, 2], weight: 1 }, // dotted-eighth + sixteenth
 ];
 
 // §5 time signatures. Cut time (2/2) shares 4/4's 16-unit groupings.

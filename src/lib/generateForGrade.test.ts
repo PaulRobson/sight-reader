@@ -93,6 +93,34 @@ describe("generateForGrade", () => {
 		expect(pinned.key).toBe("C");
 	});
 
+	it("ramps rhythm: no sub-quarter notes at grade 1, sixteenths reachable high up", () => {
+		for (let seed = 1; seed <= 10; seed++) {
+			const m = generateForGrade({
+				grade: 1,
+				key: KEY,
+				lowestMidi: LO,
+				highestMidi: HI,
+				seed,
+			});
+			const shortest = Math.min(...m.notes.map((n) => n.duration));
+			expect(shortest).toBeGreaterThanOrEqual(4); // quarter at grade 1
+		}
+		let sawSixteenth = false;
+		for (const grade of [5, 6, 7, 8] as Grade[]) {
+			for (let seed = 1; seed <= 15 && !sawSixteenth; seed++) {
+				const m = generateForGrade({
+					grade,
+					key: KEY,
+					lowestMidi: LO,
+					highestMidi: HI,
+					seed,
+				});
+				if (m.notes.some((n) => n.duration === 1)) sawSixteenth = true;
+			}
+		}
+		expect(sawSixteenth).toBe(true);
+	});
+
 	it("anchors the tessitura near centerMidi when given", () => {
 		const at = (centerMidi: number) =>
 			generateForGrade({

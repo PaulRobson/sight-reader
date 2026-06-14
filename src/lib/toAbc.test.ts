@@ -16,6 +16,7 @@ const grade1: GeneratorOptions = {
 	highestMidi: 84,
 	stepBias: 0.85,
 	maxLeap: 2,
+	meter: rhythm.restrict(rhythm.meters["4/4"], 4), // grade-1 rhythm: quarter+
 };
 
 describe("toAbc", () => {
@@ -28,7 +29,7 @@ describe("toAbc", () => {
 			Q:1/4=70
 			K:C clef=treble
 			%%MIDI program 0
-			c8 d4 e4 | c4 A4 B8 | c4 B4 A4 G4 | F4 G4 D4 C4 |"
+			c4 d4 e4 c4 | A8 B4 c4 | B4 A8 G4 | F4 G4 D4 C4 |"
 		`);
 	});
 
