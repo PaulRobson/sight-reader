@@ -5,9 +5,16 @@ export type SerializeOptions = {
 	tempo?: number; // BPM for the quarter note (Q:1/4=...)
 	program?: number; // General MIDI program
 	clef?: string; // "treble" | "bass" | "alto" | "tenor"
+	meter?: string; // time signature, e.g. "3/4"; bar lines follow melody.barUnits
 };
 
-const DEFAULTS = { title: "Exercise", tempo: 70, program: 0, clef: "treble" };
+const DEFAULTS = {
+	title: "Exercise",
+	tempo: 70,
+	program: 0,
+	clef: "treble",
+	meter: "4/4",
+};
 
 function pitchLetters(note: Note): string {
 	return note.octave >= 5
@@ -34,14 +41,14 @@ function noteStream(melody: Melody): string {
 }
 
 // Written pitch only; transposition is applied at synth time, never here.
-// Meter is fixed at 4/4 for the thin path (the only time signature the
-// generator emits so far); richer meters arrive with Slice 4.
+// L:1/16 is the default note length for every meter, so durations stay integer
+// length multipliers; bar lines are placed by melody.barUnits in noteStream.
 export function toAbc(melody: Melody, options: SerializeOptions = {}): string {
-	const { title, tempo, program, clef } = { ...DEFAULTS, ...options };
+	const { title, tempo, program, clef, meter } = { ...DEFAULTS, ...options };
 	return [
 		"X:1",
 		`T:${title}`,
-		"M:4/4",
+		`M:${meter}`,
 		"L:1/16",
 		`Q:1/4=${tempo}`,
 		`K:${melody.key} clef=${clef}`,

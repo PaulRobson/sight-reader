@@ -1,3 +1,4 @@
+import type { Meter } from "./rhythm.ts";
 import { type ScaleNote, scale } from "./scale.ts";
 
 export type GeneratorOptions = {
@@ -8,6 +9,7 @@ export type GeneratorOptions = {
 	highestMidi: number;
 	stepBias: number; // 0..1 probability of a stepwise move
 	maxLeap: number; // largest leap in scale steps (a 3rd = 2)
+	meter?: Meter; // rhythm source; defaults to 4/4 when absent
 };
 
 export type Pitch = {

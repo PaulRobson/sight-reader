@@ -27,12 +27,13 @@ export function toNotes(pitches: Pitch[], durations: number[]): Note[] {
 
 export function generateMelody(opts: GeneratorOptions): Melody {
 	const rng = mulberry32(opts.seed);
-	const durations = rhythm.drawBars(opts.bars, rng);
+	const meter = opts.meter ?? rhythm.meters["4/4"];
+	const durations = rhythm.drawBars(meter, opts.bars, rng);
 	const pitches = pitchWalk(opts, durations.length, rng);
 	return {
 		key: opts.key,
 		bars: opts.bars,
-		barUnits: rhythm.barUnits4x4,
+		barUnits: meter.barUnits,
 		notes: toNotes(pitches, durations),
 	};
 }

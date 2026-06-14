@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { generateForGrade } from "./generateForGrade.ts";
 import { type Grade, gradeDifficulty } from "./gradeDifficulty.ts";
+import { rhythm } from "./rhythm.ts";
 import { scale } from "./scale.ts";
 
 const GRADES: Grade[] = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -49,6 +50,22 @@ describe("generateForGrade", () => {
 			totalRests += m.notes.filter((n) => n.rest).length;
 		}
 		expect(totalRests).toBeGreaterThan(0); // the probability is actually wired in
+	});
+
+	it("matches barUnits to the chosen meter and varies meter across seeds", () => {
+		const seen = new Set<string>();
+		for (let seed = 1; seed <= 20; seed++) {
+			const m = generateForGrade({
+				grade: 6, // nine allowed time signatures
+				key: KEY,
+				lowestMidi: LO,
+				highestMidi: HI,
+				seed,
+			});
+			expect(m.barUnits).toBe(rhythm.meters[m.timeSignature].barUnits);
+			seen.add(m.timeSignature);
+		}
+		expect(seen.size).toBeGreaterThan(1); // selection actually spans meters
 	});
 
 	for (const grade of GRADES) {

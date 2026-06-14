@@ -1,5 +1,5 @@
 import { buildIndices, type GeneratorOptions, stepDelta } from "./pitchWalk.ts";
-import { rhythm } from "./rhythm.ts";
+import { type Meter, rhythm } from "./rhythm.ts";
 
 // §4 step 4: phrase-level repetition is what makes output sound musical.
 //  - AABA: literal repetition of one phrase with a contrasting penultimate one.
@@ -24,6 +24,7 @@ export type PlanArgs = {
 	opts: GeneratorOptions;
 	scheme: PhraseScheme;
 	phraseBars: number;
+	meter: Meter;
 	n: number;
 	start: number;
 	len: number;
@@ -36,7 +37,7 @@ function diffs(indices: number[]): number[] {
 
 // A fresh phrase contour: its rhythm and the within-phrase moves.
 function freshContour(args: PlanArgs): Contour {
-	const durations = rhythm.drawBars(args.phraseBars, args.rng);
+	const durations = rhythm.drawBars(args.meter, args.phraseBars, args.rng);
 	const indices = buildIndices(
 		durations.length,
 		args.start,

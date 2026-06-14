@@ -3,10 +3,8 @@ import { generatePhrased, schemeForGrade } from "./generatePhrased.ts";
 import { type Grade, gradeDifficulty } from "./gradeDifficulty.ts";
 import { insertRests } from "./insertRests.ts";
 import { mulberry32 } from "./mulberry32.ts";
+import { rhythm } from "./rhythm.ts";
 
-// Meters we currently have rhythm cells for. The richer time-signature task
-// widens this; until then meter selection collapses to 4/4.
-const CELL_METERS = ["4/4"];
 // Phrases are 4 bars (§4); bar counts snap to a multiple so phrases tile evenly.
 const PHRASE_BARS = 4;
 
@@ -36,8 +34,12 @@ export function generateForGrade(
 	);
 	const tempo =
 		p.tempoBpm[0] + Math.floor(rng() * (p.tempoBpm[1] - p.tempoBpm[0] + 1));
-	const meters = p.timeSignatures.filter((m) => CELL_METERS.includes(m));
-	const timeSignature = meters[Math.floor(rng() * meters.length)] ?? "4/4";
+	const timeSignature =
+		p.timeSignatures[Math.floor(rng() * p.timeSignatures.length)];
+	const meter = rhythm.restrict(
+		rhythm.meters[timeSignature],
+		p.shortestNoteSixteenths,
+	);
 	const stepBias = Math.max(0.5, 0.9 - (args.grade - 1) * 0.05);
 
 	const { melody } = generatePhrased({
@@ -50,6 +52,7 @@ export function generateForGrade(
 		maxLeap: p.maxLeapScaleSteps,
 		scheme: schemeForGrade(args.grade),
 		phraseBars: PHRASE_BARS,
+		meter,
 	});
 	const notes = insertRests(melody.notes, p.restProbability, rng);
 	return { ...melody, notes, tempo, timeSignature };

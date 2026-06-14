@@ -82,21 +82,18 @@ function toMelody(
 	pitches: Pitch[],
 	indices: number[],
 	durations: number[],
+	barUnits: number,
 ): Melody {
 	const notes: Note[] = toNotes(
 		indices.map((i) => pitches[i]),
 		durations,
 	);
-	return {
-		key: opts.key,
-		bars: opts.bars,
-		barUnits: rhythm.barUnits4x4,
-		notes,
-	};
+	return { key: opts.key, bars: opts.bars, barUnits, notes };
 }
 
 export function generatePhrased(opts: PhrasedOptions): PhrasedResult {
 	const rng = mulberry32(opts.seed);
+	const meter = opts.meter ?? rhythm.meters["4/4"];
 	const { pitches, tonics, start, cadenceTargets } = pitchSpace(opts);
 	const len = pitches.length;
 	const n = Math.max(1, Math.round(opts.bars / opts.phraseBars));
@@ -105,6 +102,7 @@ export function generatePhrased(opts: PhrasedOptions): PhrasedResult {
 		opts,
 		scheme: opts.scheme,
 		phraseBars: opts.phraseBars,
+		meter,
 		n,
 		start,
 		len,
@@ -118,7 +116,7 @@ export function generatePhrased(opts: PhrasedOptions): PhrasedResult {
 	finalizeCadence(indices, tonics);
 	const durations = spans.flatMap((s) => s.durations);
 	return {
-		melody: toMelody(opts, pitches, indices, durations),
+		melody: toMelody(opts, pitches, indices, durations, meter.barUnits),
 		phrases: spans,
 		scheme: opts.scheme,
 	};
