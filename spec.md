@@ -131,7 +131,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] `[test]` History view: past attempts with date/grade/ratings + per-dimension average. **Done:** list renders; aggregation tested. (Grade is shown as the hardcoded thin-path grade 1: `AttemptLog` (§2) carries no grade and per-attempt grade only becomes real once Slice 3 persists settings/`GeneratedPiece`.)
 
 **Manual checkpoints (end of slice):**
-- [ ] `[manual]` At countdown zero the "PLAY NOW!" banner is readable from music-stand distance.
+- [x] `[manual]` At countdown zero the "PLAY NOW!" banner is readable from music-stand distance.
 
 > End of the de-risking slice: a usable piano/grade-1 loop. Everything below adds breadth.
 
