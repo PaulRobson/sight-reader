@@ -124,6 +124,43 @@ describe("toAbc", () => {
 		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
 	});
 
+	it("beams runs of eighths within a beat and breaks at the beat and quarters", () => {
+		const e = (): Melody["notes"][number] => ({
+			midi: 60,
+			letter: "C",
+			accidental: 0,
+			octave: 4,
+			duration: 2,
+		});
+		const q = { midi: 60, letter: "C", accidental: 0, octave: 4, duration: 4 };
+		const melody: Melody = {
+			key: "C",
+			bars: 1,
+			barUnits: 16,
+			notes: [e(), e(), e(), e(), q, q], // 4 eighths (two beats) + 2 quarters
+		};
+		const abc = toAbc(melody);
+		expect(abc).toContain("C2C2 C2C2 C4 C4"); // beamed pairs, broken at beats/quarters
+		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
+	});
+
+	it("beams a dotted-eighth + sixteenth pair", () => {
+		const melody: Melody = {
+			key: "C",
+			bars: 1,
+			barUnits: 16,
+			notes: [
+				{ midi: 60, letter: "C", accidental: 0, octave: 4, duration: 3 }, // dotted-eighth
+				{ midi: 62, letter: "D", accidental: 0, octave: 4, duration: 1 }, // sixteenth
+				{ midi: 60, letter: "C", accidental: 0, octave: 4, duration: 4 },
+				{ midi: 60, letter: "C", accidental: 0, octave: 4, duration: 8 },
+			],
+		};
+		const abc = toAbc(melody);
+		expect(abc).toContain("C3D"); // dotted-eighth beamed to the sixteenth
+		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
+	});
+
 	it("collapses an all-rest bar to a single measure rest", () => {
 		const melody: Melody = {
 			key: "C",
