@@ -146,7 +146,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] Reference-before-attempt toggle (default off, §7).
 
 **Manual checkpoints (end of slice):**
-- [ ] `[manual]` The settings panel renders, every control updates state, and choices survive a page reload.
+- [x] `[manual]` The settings panel renders, every control updates state, and choices survive a page reload.
 
 ### Slice 4 — Difficulty + richer generation (§4, §5)
 - [ ] `[test]` Grade→difficulty config object keyed 1–8 (§5).
