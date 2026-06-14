@@ -59,3 +59,8 @@ run:
       - ./src
       - --threshold
       - "60"
+  - name: verify:test
+    command: npx
+    args:
+      - vitest
+      - run

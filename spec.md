@@ -101,7 +101,7 @@ The piece is stored as an **abcjs string at written pitch**. Transposition for p
 - One commit per task.
 
 ### Slice 0 — Harness & scaffolding
-- [ ] Install Vitest; add a `verify:test` run command to `assist.yml`; add one trivial passing test. **Done:** `assist run verify:test` passes.
+- [x] Install Vitest; add a `verify:test` run command to `assist.yml`; add one trivial passing test. **Done:** `assist run verify:test` passes.
 - [ ] Fix `verify:circular-deps`: it points at `src/index.ts`, which does not exist (the entry is `src/main.tsx`). Point it at the real entry. **Done:** `verify:circular-deps` passes.
 - [ ] Strip the Vite starter (`App.tsx`, demo assets, CSS) down to an empty "Sight-Reading Trainer" shell. **Done:** blank shell renders; build + lint + knip clean with no orphaned starter assets.
 - [ ] `[test]` Seedable PRNG (mulberry32). Never use bare `Math.random()` for generation. **Done:** same seed reproduces the exact sequence; range + determinism tested.
