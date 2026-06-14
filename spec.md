@@ -104,7 +104,7 @@ The piece is stored as an **abcjs string at written pitch**. Transposition for p
 - [x] Install Vitest; add a `verify:test` run command to `assist.yml`; add one trivial passing test. **Done:** `assist run verify:test` passes.
 - [x] Fix `verify:circular-deps`: it points at `src/index.ts`, which does not exist (the entry is `src/main.tsx`). Point it at the real entry. **Done:** `verify:circular-deps` passes.
 - [x] Strip the Vite starter (`App.tsx`, demo assets, CSS) down to an empty "Sight-Reading Trainer" shell. **Done:** blank shell renders; build + lint + knip clean with no orphaned starter assets.
-- [ ] `[test]` Seedable PRNG (mulberry32). Never use bare `Math.random()` for generation. **Done:** same seed reproduces the exact sequence; range + determinism tested.
+- [x] `[test]` Seedable PRNG (mulberry32). Never use bare `Math.random()` for generation. **Done:** same seed reproduces the exact sequence; range + determinism tested.
 - [ ] `[test]` localStorage helper `load<T>(key, fallback)` / `save(key, value)`. **Done:** round-trip plus fallback on missing/corrupt value tested against a mock store.
 - [ ] `[test]` App view state machine `settings → prep → playNow → assess → history` as a typed hook/reducer. **Done:** transitions unit-tested; each state renders a placeholder.
 
