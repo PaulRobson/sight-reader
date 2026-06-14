@@ -1,0 +1,61 @@
+run:
+  - name: verify:knip
+    command: npx
+    args:
+      - knip
+      - --no-progress
+      - --treat-config-hints-as-errors
+  - name: verify:lint
+    command: npx
+    args:
+      - biome
+      - check
+      - --write
+      - --error-on-warnings
+      - .
+  - name: verify:duplicate-code
+    command: npx
+    args:
+      - jscpd
+      - --format
+      - "'typescript,tsx'"
+      - --exitCode
+      - "1"
+      - --ignore
+      - "'**/*.test.*'"
+      - -r
+      - consoleFull
+      - src
+  - name: verify:hardcoded-colors
+    command: assist
+    args:
+      - verify
+      - hardcoded-colors
+  - name: verify:build
+    command: npx
+    args:
+      - tsc
+      - -b
+      - "&&"
+      - vite
+      - build
+      - --logLevel
+      - error
+  - name: verify:circular-deps
+    command: npx
+    args:
+      - -y
+      - skott
+      - --displayMode=raw
+      - --showCircularDependencies
+      - --exitCodeOnCircularDependencies=1
+      - src/index.ts
+    quiet: true
+  - name: verify:maintainability
+    command: assist
+    args:
+      - complexity
+      - maintainability
+      - ./src
+      - --threshold
+      - "60"
