@@ -1,6 +1,7 @@
 import { constrainClef, findInstrument } from "../lib/instruments.ts";
 import type { Settings } from "../lib/useSettings.ts";
 import { ClefSelector } from "./ClefSelector.tsx";
+import { CountdownInput } from "./CountdownInput.tsx";
 import { GradeSelect } from "./GradeSelect.tsx";
 import { InstrumentPicker } from "./InstrumentPicker.tsx";
 import { ModeToggle } from "./ModeToggle.tsx";
@@ -32,6 +33,10 @@ export function SettingsPanel({ settings, update }: Props) {
 				onChange={(grade) => update({ grade })}
 			/>
 			<ModeToggle value={settings.mode} onChange={(mode) => update({ mode })} />
+			<CountdownInput
+				value={settings.countdownSeconds}
+				onChange={(countdownSeconds) => update({ countdownSeconds })}
+			/>
 		</section>
 	);
 }

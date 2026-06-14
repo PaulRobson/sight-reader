@@ -10,8 +10,6 @@ import { defaultPiece } from "./lib/defaultPiece.ts";
 import { useSettings } from "./lib/useSettings.ts";
 import { useViewState, type View } from "./lib/useViewState.ts";
 
-const COUNTDOWN_SECONDS = 60; // default; configurable in Slice 3 settings
-
 const labels: Record<View, string> = {
 	settings: "Settings",
 	prep: "Prep countdown",
@@ -49,7 +47,7 @@ export default function App() {
 			<ExerciseView abc={abc} />
 			{view === "prep" ? (
 				<Countdown
-					seconds={COUNTDOWN_SECONDS}
+					seconds={settings.countdownSeconds}
 					onDone={() => dispatch({ type: "countdownDone" })}
 				/>
 			) : null}
