@@ -107,6 +107,26 @@ export const instruments: InstrumentDef[] = [
 	},
 ];
 
+const PITCH_CLASS: Record<string, number> = {
+	C: 0,
+	D: 2,
+	E: 4,
+	F: 5,
+	G: 7,
+	A: 9,
+	B: 11,
+};
+
+// Scientific pitch notation (e.g. "F#3", "Bb4", "C8") to MIDI; C4 = 60. The
+// instrument table is the only caller, so malformed input is a programmer error.
+export function spnToMidi(spn: string): number {
+	const m = /^([A-G])(#+|b+)?(-?\d)$/.exec(spn);
+	if (!m) throw new Error(`invalid scientific pitch notation: ${spn}`);
+	const [, letter, acc, octave] = m;
+	const alter = acc ? (acc[0] === "#" ? acc.length : -acc.length) : 0;
+	return 12 * (Number(octave) + 1) + PITCH_CLASS[letter] + alter;
+}
+
 export function findInstrument(id: string): InstrumentDef {
 	return instruments.find((i) => i.id === id) ?? instruments[0];
 }

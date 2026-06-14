@@ -7,6 +7,7 @@ import { SettingsPanel } from "./components/SettingsPanel.tsx";
 import type { AttemptLog } from "./lib/assessment.ts";
 import { attempts } from "./lib/attempts.ts";
 import { defaultPiece } from "./lib/defaultPiece.ts";
+import { pieceForSettings } from "./lib/pieceForSettings.ts";
 import { useSettings } from "./lib/useSettings.ts";
 import { useViewState, type View } from "./lib/useViewState.ts";
 
@@ -26,7 +27,7 @@ export default function App() {
 
 	function start(nextSeed: number) {
 		setSeed(nextSeed);
-		setAbc(defaultPiece(nextSeed));
+		setAbc(pieceForSettings(settings, nextSeed));
 		dispatch({ type: "start" });
 	}
 
