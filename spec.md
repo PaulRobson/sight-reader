@@ -139,7 +139,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] `[test]` `InstrumentDef[]` table (§6): Trombone, Cello, Piano, Flute, Violin, Clarinet in B♭, Trumpet in B♭, Alto Sax (E♭), Guitar. **Done:** ranges parse as valid SPN, offsets present, clefs non-empty; tested.
 - [x] Instrument picker wired to settings + persistence. **Done:** selection updates and persists.
 - [x] Clef selector constrained to `instrument.clefs`; piano shows the grand staff.
-- [ ] Grade select 1–8.
+- [x] Grade select 1–8.
 - [ ] Mode toggle: Melodic / Rhythm-only.
 - [ ] Countdown duration input (default 60s, 0 = skip).
 - [ ] Metronome-during-attempt toggle (default on).
