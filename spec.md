@@ -159,7 +159,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] `[test]` Accidentals / key-signature breadth per grade. **Done:** `keys` model groups written keys by signature size; `keys.pick` chooses a key within the grade's `maxKeyAccidentals` (seeded). `generateForGrade` derives the key per grade when none is passed (explicit `key` still honoured, so the C-pinned generator tests stand). `insertAccidentals` chromatically inflects interior notes at the grade's `accidentals` breadth — a semitone neighbour spelled with a single ♯/♭, range-safe, leaving the opening note and the final two-note cadence diatonic. `toAbc` now renders key-signature-aware accidentals (explicit token only when a note deviates from the key sig or an earlier accidental that bar; resets at the bar line). Tested (key breadth per grade + override, chromatic insertion none-vs-modulation, abc accidental rendering + parse).
 
 **Manual checkpoints (end of slice):**
-- [ ] `[manual]` Spot-check generated pieces at grades 3, 5, and 8: each renders cleanly and sounds musical (ear check per §4).
+- [x] `[manual]` Spot-check generated pieces at grades 3, 5, and 8: each renders cleanly and sounds musical (ear check per §4). **Verified** in browser after fixes: score wrapping, piano grand staff, web-checked instrument ranges, grade-scaled comfortable tessitura, collapsed full-bar rests, beamed eighth/sixteenth runs, and the no-two-full-bar-rests-in-a-row rule.
 
 ### Slice 5 — Playback fidelity (§6)
 - [ ] `[test]` Transposition math `soundingMidi = writtenMidi + soundingOffsetSemitones`, applied at synth time (`%%MIDI transpose` / synth option), never to the SVG. **Done:** offset math unit-tested across the §6 instruments.
