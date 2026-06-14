@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { ExerciseView } from "./components/ExerciseView.tsx";
+import { defaultPiece } from "./lib/defaultPiece.ts";
 import { useViewState, type View } from "./lib/useViewState.ts";
 
 const labels: Record<View, string> = {
@@ -10,12 +13,14 @@ const labels: Record<View, string> = {
 
 export default function App() {
 	const [view, dispatch] = useViewState();
+	const [abc] = useState(defaultPiece);
 	return (
 		<main>
 			<h1>Sight-Reading Trainer</h1>
 			<section aria-label={view}>
 				<p>{labels[view]}</p>
 			</section>
+			<ExerciseView abc={abc} />
 			<nav>
 				<button type="button" onClick={() => dispatch({ type: "start" })}>
 					Let's go
