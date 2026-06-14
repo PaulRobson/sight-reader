@@ -93,6 +93,20 @@ describe("generateForGrade", () => {
 		expect(pinned.key).toBe("C");
 	});
 
+	it("anchors the tessitura near centerMidi when given", () => {
+		const at = (centerMidi: number) =>
+			generateForGrade({
+				grade: 1,
+				key: KEY,
+				lowestMidi: 36, // C2
+				highestMidi: 96, // C7
+				seed: 5,
+				centerMidi,
+			}).notes[0].midi; // opening note is the start tonic
+		expect(at(48)).toBe(48); // nearest C to C3
+		expect(at(84)).toBe(84); // nearest C to C6
+	});
+
 	it("inserts chromatic notes at high grades but none at grade 1", () => {
 		const chromaticCount = (grade: Grade) => {
 			let total = 0;

@@ -33,7 +33,7 @@ export const instruments: InstrumentDef[] = [
 		soundingOffsetSemitones: 0,
 		gmProgram: 42,
 		lowestWrittenNote: "C2",
-		highestWrittenNote: "A5",
+		highestWrittenNote: "C6",
 	},
 	{
 		id: "piano",
@@ -53,7 +53,7 @@ export const instruments: InstrumentDef[] = [
 		soundingOffsetSemitones: 0,
 		gmProgram: 73,
 		lowestWrittenNote: "C4",
-		highestWrittenNote: "D7",
+		highestWrittenNote: "C7",
 	},
 	{
 		id: "violin",
@@ -63,7 +63,7 @@ export const instruments: InstrumentDef[] = [
 		soundingOffsetSemitones: 0,
 		gmProgram: 40,
 		lowestWrittenNote: "G3",
-		highestWrittenNote: "A7",
+		highestWrittenNote: "E7",
 	},
 	{
 		id: "bflat-clarinet",
@@ -73,7 +73,7 @@ export const instruments: InstrumentDef[] = [
 		soundingOffsetSemitones: -2,
 		gmProgram: 71,
 		lowestWrittenNote: "E3",
-		highestWrittenNote: "C6",
+		highestWrittenNote: "G6",
 	},
 	{
 		id: "bflat-trumpet",
@@ -83,7 +83,7 @@ export const instruments: InstrumentDef[] = [
 		soundingOffsetSemitones: -2,
 		gmProgram: 56,
 		lowestWrittenNote: "F#3",
-		highestWrittenNote: "C6",
+		highestWrittenNote: "D6",
 	},
 	{
 		id: "alto-sax",

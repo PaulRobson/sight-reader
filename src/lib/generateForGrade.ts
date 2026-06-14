@@ -17,6 +17,7 @@ type GradeArgs = {
 	lowestMidi: number;
 	highestMidi: number;
 	seed: number;
+	centerMidi?: number; // tessitura anchor; defaults to the range midpoint
 };
 
 // Snap a raw bar count to a whole number of phrases. Every grade's min/max are
@@ -57,6 +58,7 @@ export function generateForGrade(
 		scheme: schemeForGrade(args.grade),
 		phraseBars: PHRASE_BARS,
 		meter,
+		centerMidi: args.centerMidi,
 	});
 	const rested = insertRests(melody.notes, p.restProbability, rng);
 	const scalePitchClasses = new Set(scale.major(key).map((d) => d.pitchClass));

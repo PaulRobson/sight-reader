@@ -7,6 +7,7 @@ export type SerializeOptions = {
 	program?: number; // General MIDI program
 	clef?: string; // "treble" | "bass" | "alto" | "tenor"
 	meter?: string; // time signature, e.g. "3/4"; bar lines follow melody.barUnits
+	grandStaff?: boolean; // split across treble + bass staves (piano)
 };
 
 const DEFAULTS = {
@@ -15,7 +16,10 @@ const DEFAULTS = {
 	program: 0,
 	clef: "treble",
 	meter: "4/4",
+	grandStaff: false,
 };
+
+const MIDDLE_C = 60;
 
 const ACCIDENTAL_PREFIX: Record<number, string> = {
 	"-2": "__",
@@ -59,15 +63,15 @@ function noteToken(
 	return `${prefix}${pitchLetters(note)}${length}`;
 }
 
-function noteStream(melody: Melody): string {
-	const keySig = keySignature(melody.key);
+function noteStream(key: string, barUnits: number, notes: Note[]): string {
+	const keySig = keySignature(key);
 	const parts: string[] = [];
 	let bar: Record<string, number> = {};
 	let acc = 0;
-	for (const note of melody.notes) {
+	for (const note of notes) {
 		parts.push(noteToken(note, keySig, bar));
 		acc += note.duration;
-		if (acc % melody.barUnits === 0) {
+		if (acc % barUnits === 0) {
 			bar = {}; // accidentals reset at the bar line
 			parts.push("|");
 		}
@@ -75,19 +79,42 @@ function noteStream(melody: Melody): string {
 	return parts.join(" ");
 }
 
+// Split a single line across a grand staff: each pitched note goes to the staff
+// for its register, the other staff carries an aligned rest (so bars line up).
+function splitGrandStaff(notes: Note[]): { treble: Note[]; bass: Note[] } {
+	const rest = (n: Note): Note => ({ ...n, rest: true });
+	return {
+		treble: notes.map((n) => (!n.rest && n.midi >= MIDDLE_C ? n : rest(n))),
+		bass: notes.map((n) => (!n.rest && n.midi < MIDDLE_C ? n : rest(n))),
+	};
+}
+
 // Written pitch only; transposition is applied at synth time, never here.
 // L:1/16 is the default note length for every meter, so durations stay integer
 // length multipliers; bar lines are placed by melody.barUnits in noteStream.
 export function toAbc(melody: Melody, options: SerializeOptions = {}): string {
-	const { title, tempo, program, clef, meter } = { ...DEFAULTS, ...options };
+	const { title, tempo, program, clef, meter, grandStaff } = {
+		...DEFAULTS,
+		...options,
+	};
+	const head = ["X:1", `T:${title}`, `M:${meter}`, "L:1/16", `Q:1/4=${tempo}`];
+	if (grandStaff) {
+		const { treble, bass } = splitGrandStaff(melody.notes);
+		return [
+			...head,
+			`K:${melody.key}`,
+			`%%MIDI program ${program}`,
+			"%%score {1 2}",
+			"V:1 clef=treble",
+			"V:2 clef=bass",
+			`[V:1] ${noteStream(melody.key, melody.barUnits, treble)}`,
+			`[V:2] ${noteStream(melody.key, melody.barUnits, bass)}`,
+		].join("\n");
+	}
 	return [
-		"X:1",
-		`T:${title}`,
-		`M:${meter}`,
-		"L:1/16",
-		`Q:1/4=${tempo}`,
+		...head,
 		`K:${melody.key} clef=${clef}`,
 		`%%MIDI program ${program}`,
-		noteStream(melody),
+		noteStream(melody.key, melody.barUnits, melody.notes),
 	].join("\n");
 }

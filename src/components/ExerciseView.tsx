@@ -21,8 +21,14 @@ export function ExerciseView({ abc }: Props) {
 
 	useEffect(() => {
 		if (!scoreRef.current) return;
+		// Wrap by measures so higher grades break onto multiple lines instead of
+		// squeezing every bar onto one shrinking line (§9). staffwidth seeds the
+		// line-breaking; responsive then scales the result to the container.
+		const width = scoreRef.current.clientWidth || 720;
 		const tunes = abcjs.renderAbc(scoreRef.current, abc, {
 			responsive: "resize",
+			staffwidth: width,
+			wrap: { minSpacing: 1.8, maxSpacing: 2.7, preferredMeasuresPerLine: 4 },
 		});
 		visualObjRef.current = tunes[0] ?? null;
 	}, [abc]);

@@ -33,6 +33,16 @@ describe("pieceForSettings", () => {
 		expect(pieceForSettings(base, 7)).toBe(pieceForSettings(base, 7));
 	});
 
+	it("renders piano as a grand staff", () => {
+		const abc = pieceForSettings(
+			{ ...base, instrumentId: "piano", grade: 3 },
+			1,
+		);
+		expect(abc).toContain("%%score {1 2}");
+		expect(abc).toContain("V:1 clef=treble");
+		expect(abc).toContain("V:2 clef=bass");
+	});
+
 	it("reflects the chosen clef and a meter header", () => {
 		const abc = pieceForSettings(
 			{ ...base, instrumentId: "cello", clef: "bass", grade: 5 },

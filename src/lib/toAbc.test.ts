@@ -99,6 +99,30 @@ describe("toAbc", () => {
 		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
 	});
 
+	it("renders a grand staff as two voices split at middle C", () => {
+		const melody: Melody = {
+			key: "C",
+			bars: 1,
+			barUnits: 16,
+			notes: [
+				{ midi: 72, letter: "C", accidental: 0, octave: 5, duration: 4 }, // treble
+				{ midi: 55, letter: "G", accidental: 0, octave: 3, duration: 4 }, // bass
+				{ midi: 64, letter: "E", accidental: 0, octave: 4, duration: 4 }, // treble
+				{ midi: 48, letter: "C", accidental: 0, octave: 3, duration: 4 }, // bass
+			],
+		};
+		const abc = toAbc(melody, { grandStaff: true });
+		expect(abc).toContain("%%score {1 2}");
+		expect(abc).toContain("V:1 clef=treble");
+		expect(abc).toContain("V:2 clef=bass");
+		const lines = abc.split("\n");
+		const v1 = lines.find((l) => l.startsWith("[V:1]")) ?? "";
+		const v2 = lines.find((l) => l.startsWith("[V:2]")) ?? "";
+		expect(v1).toContain("z"); // rest where a bass note sits
+		expect(v2).toContain("z"); // rest where a treble note sits
+		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
+	});
+
 	it("emits z tokens for rested slots and still parses cleanly", () => {
 		const melody = generateMelody(grade1);
 		melody.notes[1] = { ...melody.notes[1], rest: true };
