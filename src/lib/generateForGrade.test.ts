@@ -34,6 +34,23 @@ describe("generateForGrade", () => {
 		expect(generateForGrade(args)).toEqual(generateForGrade(args));
 	});
 
+	it("inserts rests per the grade's probability, never at the endpoints", () => {
+		let totalRests = 0;
+		for (let seed = 1; seed <= 10; seed++) {
+			const m = generateForGrade({
+				grade: 8, // highest rest probability (0.4)
+				key: KEY,
+				lowestMidi: LO,
+				highestMidi: HI,
+				seed,
+			});
+			expect(m.notes[0].rest).toBeFalsy();
+			expect(m.notes[m.notes.length - 1].rest).toBeFalsy();
+			totalRests += m.notes.filter((n) => n.rest).length;
+		}
+		expect(totalRests).toBeGreaterThan(0); // the probability is actually wired in
+	});
+
 	for (const grade of GRADES) {
 		describe(`grade ${grade}`, () => {
 			const p = gradeDifficulty[grade];

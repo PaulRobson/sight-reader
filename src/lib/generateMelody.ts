@@ -10,6 +10,7 @@ export type Note = {
 	accidental: number;
 	octave: number;
 	duration: number; // sixteenth-note units
+	rest?: boolean; // slot is silent; pitch fields retained for walk continuity
 };
 
 export type Melody = {

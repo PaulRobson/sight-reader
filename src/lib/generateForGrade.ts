@@ -1,6 +1,7 @@
 import type { Melody } from "./generateMelody.ts";
 import { generatePhrased, schemeForGrade } from "./generatePhrased.ts";
 import { type Grade, gradeDifficulty } from "./gradeDifficulty.ts";
+import { insertRests } from "./insertRests.ts";
 import { mulberry32 } from "./mulberry32.ts";
 
 // Meters we currently have rhythm cells for. The richer time-signature task
@@ -50,5 +51,6 @@ export function generateForGrade(
 		scheme: schemeForGrade(args.grade),
 		phraseBars: PHRASE_BARS,
 	});
-	return { ...melody, tempo, timeSignature };
+	const notes = insertRests(melody.notes, p.restProbability, rng);
+	return { ...melody, notes, tempo, timeSignature };
 }

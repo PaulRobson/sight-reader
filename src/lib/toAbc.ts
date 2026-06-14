@@ -9,12 +9,16 @@ export type SerializeOptions = {
 
 const DEFAULTS = { title: "Exercise", tempo: 70, program: 0, clef: "treble" };
 
-// L:1/16, so a note's duration in sixteenth units is its abc length multiplier.
-function pitchToken(note: Note): string {
-	const base =
-		note.octave >= 5
-			? `${note.letter.toLowerCase()}${"'".repeat(note.octave - 5)}`
-			: `${note.letter.toUpperCase()}${",".repeat(Math.max(0, 4 - note.octave))}`;
+function pitchLetters(note: Note): string {
+	return note.octave >= 5
+		? `${note.letter.toLowerCase()}${"'".repeat(note.octave - 5)}`
+		: `${note.letter.toUpperCase()}${",".repeat(Math.max(0, 4 - note.octave))}`;
+}
+
+// L:1/16, so a slot's duration in sixteenth units is its abc length multiplier;
+// rests use `z`.
+function noteToken(note: Note): string {
+	const base = note.rest ? "z" : pitchLetters(note);
 	return note.duration === 1 ? base : `${base}${note.duration}`;
 }
 
@@ -22,7 +26,7 @@ function noteStream(melody: Melody): string {
 	const parts: string[] = [];
 	let acc = 0;
 	for (const note of melody.notes) {
-		parts.push(pitchToken(note));
+		parts.push(noteToken(note));
 		acc += note.duration;
 		if (acc % melody.barUnits === 0) parts.push("|");
 	}

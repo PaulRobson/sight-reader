@@ -49,4 +49,13 @@ describe("toAbc", () => {
 		);
 		expect(abc).toMatch(/[A-G],/); // a note below middle C
 	});
+
+	it("emits z tokens for rested slots and still parses cleanly", () => {
+		const melody = generateMelody(grade1);
+		melody.notes[1] = { ...melody.notes[1], rest: true };
+		const abc = toAbc(melody);
+		expect(abc).toMatch(/z\d/); // a rest with a length multiplier
+		const tunes = abcjs.parseOnly(abc);
+		expect(tunes[0].warnings).toBeUndefined();
+	});
 });
