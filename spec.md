@@ -113,7 +113,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] Install `abcjs` 6.6.3 (the default npm import includes audio, §1). **Done:** build passes; a smoke test asserts `typeof abcjs.synth.CreateSynth === "function"`.
 - [x] `[test]` Scale/key model: diatonic scale-degree set + chord tones (degrees 1, 3, 5) for a written key. **Done:** C major and one sharp/flat key give correct degrees; tested.
 - [x] `[test]` Rhythm-cell library for 4/4 + a seeded weighted draw. **Done:** every cell sums to one bar; the draw is deterministic by seed; tested.
-- [ ] `[test]` Minimal melodic generator: stepwise-biased pitches over a generated rhythm, first note tonic, last note tonic approached by step, range clamp. **Done:** deterministic grade-1 C-major 4-bar piece, all notes in range, correct start/end; tested.
+- [x] `[test]` Minimal melodic generator: stepwise-biased pitches over a generated rhythm, first note tonic, last note tonic approached by step, range clamp. **Done:** deterministic grade-1 C-major 4-bar piece, all notes in range, correct start/end; tested.
 - [ ] `[test]` Serializer: internal representation → abc string (header `X/T/M/L/K/Q/%%MIDI program` + barred note stream, written pitch only). **Done:** snapshot-tested; the string parses via `renderAbc` without throwing (jsdom).
 - [ ] Render + Play wiring: render the current abc with `renderAbc` (`responsive: "resize"`) into the exercise view; wire a Play button to `CreateSynth` `init → prime → start` with a priming spinner; gate on `supportsAudio()` (§1). **Done:** build + lint pass (behaviour confirmed in the manual batch below).
 

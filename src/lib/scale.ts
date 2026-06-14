@@ -52,4 +52,9 @@ export const scale = {
 	chordTones(notes: ScaleNote[]): ScaleNote[] {
 		return [notes[0], notes[2], notes[4]];
 	},
+	// SPN octave (C4 = middle C = MIDI 60). Octave follows the letter, so Cb4
+	// and B#3 stay correctly labelled.
+	toMidi(note: ScaleNote, octave: number): number {
+		return 12 * (octave + 1) + LETTER_PC[note.letter] + note.accidental;
+	},
 };
