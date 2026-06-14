@@ -137,7 +137,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 
 ### Slice 3 — Settings (replace the hardcoding)
 - [x] `[test]` `InstrumentDef[]` table (§6): Trombone, Cello, Piano, Flute, Violin, Clarinet in B♭, Trumpet in B♭, Alto Sax (E♭), Guitar. **Done:** ranges parse as valid SPN, offsets present, clefs non-empty; tested.
-- [ ] Instrument picker wired to settings + persistence. **Done:** selection updates and persists.
+- [x] Instrument picker wired to settings + persistence. **Done:** selection updates and persists.
 - [ ] Clef selector constrained to `instrument.clefs`; piano shows the grand staff.
 - [ ] Grade select 1–8.
 - [ ] Mode toggle: Melodic / Rhythm-only.

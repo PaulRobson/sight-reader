@@ -1,4 +1,4 @@
-type Clef = "treble" | "bass" | "alto" | "tenor";
+export type Clef = "treble" | "bass" | "alto" | "tenor";
 
 // §2 / §6. Ranges are WRITTEN pitch in scientific pitch notation.
 // soundingOffsetSemitones is applied only at playback (§6), never to the score.

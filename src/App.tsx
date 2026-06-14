@@ -3,9 +3,11 @@ import { AssessmentForm } from "./components/AssessmentForm.tsx";
 import { Countdown } from "./components/Countdown.tsx";
 import { ExerciseView } from "./components/ExerciseView.tsx";
 import { HistoryView } from "./components/HistoryView.tsx";
+import { InstrumentPicker } from "./components/InstrumentPicker.tsx";
 import type { AttemptLog } from "./lib/assessment.ts";
 import { attempts } from "./lib/attempts.ts";
 import { defaultPiece } from "./lib/defaultPiece.ts";
+import { useSettings } from "./lib/useSettings.ts";
 import { useViewState, type View } from "./lib/useViewState.ts";
 
 const COUNTDOWN_SECONDS = 60; // default; configurable in Slice 3 settings
@@ -20,6 +22,7 @@ const labels: Record<View, string> = {
 
 export default function App() {
 	const [view, dispatch] = useViewState();
+	const { settings, update } = useSettings();
 	const [seed, setSeed] = useState(1);
 	const [abc, setAbc] = useState(() => defaultPiece());
 
@@ -40,6 +43,12 @@ export default function App() {
 			<section aria-label={view}>
 				<p>{labels[view]}</p>
 			</section>
+			{view === "settings" ? (
+				<InstrumentPicker
+					value={settings.instrumentId}
+					onChange={(instrumentId) => update({ instrumentId })}
+				/>
+			) : null}
 			<ExerciseView abc={abc} />
 			{view === "prep" ? (
 				<Countdown
