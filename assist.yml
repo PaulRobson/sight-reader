@@ -49,7 +49,7 @@ run:
       - --displayMode=raw
       - --showCircularDependencies
       - --exitCodeOnCircularDependencies=1
-      - src/index.ts
+      - src/main.tsx
     quiet: true
   - name: verify:maintainability
     command: assist
