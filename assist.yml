@@ -18,11 +18,11 @@ run:
     args:
       - jscpd
       - --format
-      - "'typescript,tsx'"
-      - --exitCode
+      - "typescript,tsx"
+      - --exit-code
       - "1"
       - --ignore
-      - "'**/*.test.*'"
+      - "**/*.test.*"
       - -r
       - consoleFull
       - src
