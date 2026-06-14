@@ -22,18 +22,44 @@ const STAFF_CENTER: Record<Clef, number> = {
 };
 const GRAND_STAFF_CENTER = 60; // middle C straddles the two staves
 
+// A comfortable playing span (semitones either side of the tessitura centre),
+// widening with grade. Kept well inside the instrument's absolute range so
+// exercises avoid the expert-only extremes (e.g. cello above A5). The instrument
+// range is the hard ceiling; this is the softer band exercises actually use.
+export function comfortableRange(
+	center: number,
+	grade: Grade,
+	instrumentLow: number,
+	instrumentHigh: number,
+): { lowestMidi: number; highestMidi: number } {
+	const span = 9 + Math.floor((grade - 1) / 2) * 3; // g1–2:9 … g7–8:18 semitones
+	return {
+		lowestMidi: Math.max(instrumentLow, center - span),
+		highestMidi: Math.min(instrumentHigh, center + span),
+	};
+}
+
 // Written-pitch abc for the current settings + seed: grade drives difficulty,
-// the instrument's written range clamps it, the key is derived per grade. Timbre
-// and transposition stay default here; playback fidelity (§6) arrives in Slice 5.
+// generation sits in a grade-scaled comfortable band around the staff (within
+// the instrument's range), the key is derived per grade. Timbre and
+// transposition stay default here; playback fidelity (§6) arrives in Slice 5.
 export function pieceForSettings(settings: Settings, seed: number): string {
 	const instrument = findInstrument(settings.instrumentId);
 	const grandStaff = isGrandStaff(instrument);
+	const grade = asGrade(settings.grade);
+	const center = grandStaff ? GRAND_STAFF_CENTER : STAFF_CENTER[settings.clef];
+	const range = comfortableRange(
+		center,
+		grade,
+		spnToMidi(instrument.lowestWrittenNote),
+		spnToMidi(instrument.highestWrittenNote),
+	);
 	const melody = generateForGrade({
-		grade: asGrade(settings.grade),
-		lowestMidi: spnToMidi(instrument.lowestWrittenNote),
-		highestMidi: spnToMidi(instrument.highestWrittenNote),
+		grade,
+		lowestMidi: range.lowestMidi,
+		highestMidi: range.highestMidi,
 		seed,
-		centerMidi: grandStaff ? GRAND_STAFF_CENTER : STAFF_CENTER[settings.clef],
+		centerMidi: center,
 	});
 	return toAbc(melody, {
 		tempo: melody.tempo,

@@ -1,6 +1,7 @@
 import abcjs from "abcjs";
 import { describe, expect, it } from "vitest";
-import { pieceForSettings } from "./pieceForSettings.ts";
+import type { Grade } from "./gradeDifficulty.ts";
+import { comfortableRange, pieceForSettings } from "./pieceForSettings.ts";
 import type { Settings } from "./useSettings.ts";
 
 const base: Settings = {
@@ -31,6 +32,24 @@ describe("pieceForSettings", () => {
 
 	it("is deterministic for the same settings and seed", () => {
 		expect(pieceForSettings(base, 7)).toBe(pieceForSettings(base, 7));
+	});
+
+	it("keeps the comfortable range inside the instrument and widening with grade", () => {
+		const CELLO_LOW = 36; // C2
+		const CELLO_HIGH = 84; // C6
+		const center = 50; // D3, bass staff middle
+		const g3 = comfortableRange(center, 3 as Grade, CELLO_LOW, CELLO_HIGH);
+		const g8 = comfortableRange(center, 8 as Grade, CELLO_LOW, CELLO_HIGH);
+		// never exceeds the instrument bounds
+		expect(g3.lowestMidi).toBeGreaterThanOrEqual(CELLO_LOW);
+		expect(g8.highestMidi).toBeLessThanOrEqual(CELLO_HIGH);
+		// a grade-5 cello exercise stays well below the expert region (A5 = 81)
+		const g5 = comfortableRange(center, 5 as Grade, CELLO_LOW, CELLO_HIGH);
+		expect(g5.highestMidi).toBeLessThan(81);
+		// higher grades use a wider band
+		expect(g8.highestMidi - g8.lowestMidi).toBeGreaterThan(
+			g3.highestMidi - g3.lowestMidi,
+		);
 	});
 
 	it("renders piano as a grand staff", () => {
