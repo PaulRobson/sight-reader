@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { Countdown } from "./components/Countdown.tsx";
 import { ExerciseView } from "./components/ExerciseView.tsx";
 import { defaultPiece } from "./lib/defaultPiece.ts";
 import { useViewState, type View } from "./lib/useViewState.ts";
+
+const COUNTDOWN_SECONDS = 60; // default; configurable in Slice 3 settings
 
 const labels: Record<View, string> = {
 	settings: "Settings",
@@ -27,15 +30,15 @@ export default function App() {
 				<p>{labels[view]}</p>
 			</section>
 			<ExerciseView abc={abc} />
+			{view === "prep" ? (
+				<Countdown
+					seconds={COUNTDOWN_SECONDS}
+					onDone={() => dispatch({ type: "countdownDone" })}
+				/>
+			) : null}
 			<nav>
 				<button type="button" onClick={letsGo}>
 					Let's go
-				</button>
-				<button
-					type="button"
-					onClick={() => dispatch({ type: "countdownDone" })}
-				>
-					Begin
 				</button>
 				<button
 					type="button"
