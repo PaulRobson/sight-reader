@@ -11,20 +11,26 @@ A proof-of-concept web app that generates musical-sounding sight-reading exercis
 ## 1. Recommended tech stack
 
 - **Vite** (already set up) + **React + TypeScript** (use whatever the existing Vite template is; React + TS assumed below).
-- **[abcjs](https://www.abcjs.net/) (v6.x)** — does notation rendering **and** audio synthesis in one library. This is the core dependency and the reason the architecture is simple. It handles:
+- **[abcjs](https://www.abcjs.net/) (v6.6.3, latest as of 2026-04-24)** — does notation rendering **and** audio synthesis in one library. This is the core dependency and the reason the architecture is simple. It handles:
   - SVG sheet-music rendering (`renderAbc`)
   - Audio playback via a built-in synth + General MIDI soundfont
   - Per-voice / per-playback transposition (for transposing instruments)
   - A built-in metronome count-in
   - Dynamics and articulation decorations (these render and partially affect playback)
 - **localStorage** for settings, history, and saved pieces. No state library needed; plain React state + a thin persistence helper is fine.
+- **Vitest** for unit tests (not yet installed; the first scaffolding task adds it plus a `verify:test` command). The pure logic is where the test value sits: PRNG, scale/chord model, rhythm cells, generator, serializer, transposition math, persistence, history aggregation.
+- **Verify suite** (`assist.yml`) runs every session and is strict: `knip --treat-config-hints-as-errors` (fails on unused exports/deps), `biome` lint with `--error-on-warnings`, `jscpd` duplicate-code, circular-deps, and a maintainability threshold. Each `/loop` session must leave all of them green, which is why the build order below wires modules in as they are written rather than building unused code ahead of its consumer.
 
 **abcjs gotchas to handle up front (these waste hours otherwise):**
-- Use the **`abcjs-basic`** build, not the render-only build, or audio silently does nothing.
+- For a **Vite/npm import**, `import abcjs from 'abcjs'` (package `main: index.js`, v6.6.3) already includes audio synthesis at `abcjs.synth`; no special build is needed. The `abcjs-basic` vs `abcjs-plugin` split only matters for the prebuilt browser `<script>` bundles in `dist/` (`abcjs-basic-min.js` has audio; `abcjs-plugin-min.js` is the editor plugin). Gate audio on `abcjs.synth.supportsAudio()`.
 - The synth must `prime()` (download soundfont samples) before playback; first play has noticeable latency. Show a loading spinner on the Play button during priming.
 - Browser autoplay policy: audio can only start after a user gesture. The "Play reference" button is a gesture; the auto-start at end of countdown is **not**, so don't auto-play audio at countdown end — only show the "PLAY NOW" banner and (optionally) start the metronome, which must itself have been armed by the earlier user gesture. On iPad/iOS Safari this is stricter still — see §9 for the AudioContext-resume-on-tap requirement.
 - Manage `AudioContext` state explicitly; a suspended context is a common silent-failure cause.
-- The exact synth API (`CreateSynth`, `init`, `prime`, `start`, `SynthController`) should be confirmed against current docs at https://docs.abcjs.net/ — treat any API names here as indicative, not authoritative.
+- **Synth API, verified against abcjs 6.6.3 docs (2026-06):** audio lives under `abcjs.synth`.
+  - `abcjs.synth.supportsAudio()` — capability check; call before any audio setup.
+  - Low-level: `const synth = new abcjs.synth.CreateSynth()`, then `await synth.init({ visualObj, audioContext, millisecondsPerMeasure, options })`, `await synth.prime()`, `synth.start()`. Also `stop()`, `pause()`, `resume()`, `seek(percent, units)`, `getAudioBuffer()`, `download()`. `init()` references an `AudioContext`, so it must run inside a user gesture. `options` carries `soundFontUrl`, `program`, `pan`, `fadeLength`, etc.
+  - Widget (gives transport UI for free): `const ctl = new abcjs.synth.SynthController(); ctl.load(selector, cursorControl, { displayPlay, displayProgress, displayLoop, displayRestart, displayWarp }); await ctl.setTune(visualObj, userAction, audioParams)`; then `play()`, `pause()`, `restart()`, `toggleLoop()`, `setWarp(percent)`.
+  - `abcjs.renderAbc(selector, abc, { responsive: "resize" })` returns the `visualObj[]` you feed to `init` / `setTune`.
 
 ---
 
@@ -84,58 +90,114 @@ The piece is stored as an **abcjs string at written pitch**. Transposition for p
 
 ---
 
-## 3. Build phases (todo list)
+## 3. Build order (the /loop task list)
 
-### Phase 0 — Scaffolding
-- [ ] Install `abcjs`; confirm the `-basic` build is what's imported.
-- [ ] Set up app shell: Settings panel ➜ Exercise view, with routing or simple view state.
-- [ ] localStorage persistence helper (`load<T>(key, fallback)`, `save(key, value)`).
-- [ ] Seedable PRNG (e.g. mulberry32) so `GeneratedPiece.seed` reproduces a piece exactly. Do **not** use bare `Math.random()` for generation.
+**How to work this list.** Tasks are sized for a single `/loop` session: work top to bottom, complete one checkbox per session, and leave every `assist verify:*` command passing before marking it done. Slices 0–2 build one thin end-to-end path (the de-risking slice, §11); later slices add breadth. Conventions:
 
-### Phase 1 — Settings
-- [ ] Instrument picker, backed by an `InstrumentDef[]` table (§6). Start with: Trombone, Cello, Piano, Flute, Violin, Clarinet in B♭, Trumpet in B♭, Alto Sax (E♭), Guitar.
-- [ ] Clef selector (constrained to the instrument's `clefs`; piano shows grand staff).
-- [ ] Grade slider/select 1–8 (drives the difficulty table in §5).
+- `[test]` — ship Vitest unit tests with the code. Auto-verifiable; the pure logic lives here.
+- `[manual]` — cannot be verified headlessly (sound, layout, iOS, readability from a stand). These are **grouped into a Manual checkpoints block at the end of each slice**: finish every auto-verifiable task in the slice first, then hand the whole manual batch back for one browser/iPad session. Do not mark them done unverified.
+- Untagged tasks are covered by the existing verify suite (build, lint, knip, duplicate-code, circular-deps, maintainability) only.
+- Introduce the §2 types alongside their first consumer, not as a standalone file: `knip` fails on unused exports, so every session must wire in what it builds.
+- One commit per task.
+
+### Slice 0 — Harness & scaffolding
+- [ ] Install Vitest; add a `verify:test` run command to `assist.yml`; add one trivial passing test. **Done:** `assist run verify:test` passes.
+- [ ] Fix `verify:circular-deps`: it points at `src/index.ts`, which does not exist (the entry is `src/main.tsx`). Point it at the real entry. **Done:** `verify:circular-deps` passes.
+- [ ] Strip the Vite starter (`App.tsx`, demo assets, CSS) down to an empty "Sight-Reading Trainer" shell. **Done:** blank shell renders; build + lint + knip clean with no orphaned starter assets.
+- [ ] `[test]` Seedable PRNG (mulberry32). Never use bare `Math.random()` for generation. **Done:** same seed reproduces the exact sequence; range + determinism tested.
+- [ ] `[test]` localStorage helper `load<T>(key, fallback)` / `save(key, value)`. **Done:** round-trip plus fallback on missing/corrupt value tested against a mock store.
+- [ ] `[test]` App view state machine `settings → prep → playNow → assess → history` as a typed hook/reducer. **Done:** transitions unit-tested; each state renders a placeholder.
+
+### Slice 1 — abcjs spike + thin musical path
+Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 bars. Build the auto-verifiable pieces first; the visual/audio confirmations are batched at the end.
+- [ ] Install `abcjs` 6.6.3 (the default npm import includes audio, §1). **Done:** build passes; a smoke test asserts `typeof abcjs.synth.CreateSynth === "function"`.
+- [ ] `[test]` Scale/key model: diatonic scale-degree set + chord tones (degrees 1, 3, 5) for a written key. **Done:** C major and one sharp/flat key give correct degrees; tested.
+- [ ] `[test]` Rhythm-cell library for 4/4 + a seeded weighted draw. **Done:** every cell sums to one bar; the draw is deterministic by seed; tested.
+- [ ] `[test]` Minimal melodic generator: stepwise-biased pitches over a generated rhythm, first note tonic, last note tonic approached by step, range clamp. **Done:** deterministic grade-1 C-major 4-bar piece, all notes in range, correct start/end; tested.
+- [ ] `[test]` Serializer: internal representation → abc string (header `X/T/M/L/K/Q/%%MIDI program` + barred note stream, written pitch only). **Done:** snapshot-tested; the string parses via `renderAbc` without throwing (jsdom).
+- [ ] Render + Play wiring: render the current abc with `renderAbc` (`responsive: "resize"`) into the exercise view; wire a Play button to `CreateSynth` `init → prime → start` with a priming spinner; gate on `supportsAudio()` (§1). **Done:** build + lint pass (behaviour confirmed in the manual batch below).
+
+**Manual checkpoints (verify together at the end of the slice):**
+- [ ] `[manual]` The hardcoded C-major piece renders as visible SVG in the exercise view.
+- [ ] `[manual]` Play produces audible sound (first tap primes with a visible spinner, then plays).
+- [ ] `[manual]` Switched to generator output, a grade-1 piece renders and reads as a simple, singable tune with a clear ending on C (ear check per §4).
+
+### Slice 2 — Attempt flow around the thin path
+- [ ] "Let's go" generates + renders the piece and enters `prep`. **Done:** the button shows a fresh score.
+- [ ] `[test]` Countdown timer (default 60s, 0 = skip) with a Skip button. **Done:** counts down and Skip jumps to zero; logic tested with fake timers.
+- [ ] "PLAY NOW!" banner rendered on entering the `playNow` state (large, high-contrast). **Done:** banner element appears on the state transition; build + lint pass.
+- [ ] `[test]` Self-assessment form: the 5 `AttemptLog` dimensions + optional notes. **Done:** produces a valid `AttemptLog`; validation/state tested.
+- [ ] `[test]` Save attempt to localStorage keyed by `pieceId`; "Try again (same piece)" reuses the seed, "New piece" reseeds. **Done:** attempt persists; same seed regenerates identical abc; tested.
+- [ ] `[test]` History view: past attempts with date/grade/ratings + per-dimension average. **Done:** list renders; aggregation tested.
+
+**Manual checkpoints (end of slice):**
+- [ ] `[manual]` At countdown zero the "PLAY NOW!" banner is readable from music-stand distance.
+
+> End of the de-risking slice: a usable piano/grade-1 loop. Everything below adds breadth.
+
+### Slice 3 — Settings (replace the hardcoding)
+- [ ] `[test]` `InstrumentDef[]` table (§6): Trombone, Cello, Piano, Flute, Violin, Clarinet in B♭, Trumpet in B♭, Alto Sax (E♭), Guitar. **Done:** ranges parse as valid SPN, offsets present, clefs non-empty; tested.
+- [ ] Instrument picker wired to settings + persistence. **Done:** selection updates and persists.
+- [ ] Clef selector constrained to `instrument.clefs`; piano shows the grand staff.
+- [ ] Grade select 1–8.
 - [ ] Mode toggle: Melodic / Rhythm-only.
-- [ ] Countdown duration input (default 60s, allow 0 = skip).
-- [ ] Toggle: metronome during attempt (default on).
-- [ ] Toggle: allow reference playback before attempt (default off — see §7).
-- [ ] Persist all settings to localStorage.
+- [ ] Countdown duration input (default 60s, 0 = skip).
+- [ ] Metronome-during-attempt toggle (default on).
+- [ ] Reference-before-attempt toggle (default off, §7).
 
-### Phase 2 — Generation engine (the heart of it — see §4)
-- [ ] Difficulty config table mapping grade ➜ parameters (§5).
-- [ ] Rhythm-cell library per time signature.
-- [ ] Melodic generator with stepwise bias, leap resolution, phrase structure, motif repetition/sequence, start/end on chord tones.
-- [ ] Range clamping to the instrument's written range.
-- [ ] Dynamics & articulation layer (grade-gated).
-- [ ] Serializer: internal representation ➜ abcjs string.
-- [ ] Rhythm-only variant: single fixed pitch, rhythm cells only, percussion/rhythm presentation.
+**Manual checkpoints (end of slice):**
+- [ ] `[manual]` The settings panel renders, every control updates state, and choices survive a page reload.
 
-### Phase 3 — Render & playback
-- [ ] Render the abc string to SVG with `renderAbc` into the exercise view (use the `responsive: "resize"` option so it scales to the container — see §9).
-- [ ] "Play reference" button: init synth, `prime()` (with spinner), play.
-- [ ] Apply instrument transposition to playback so the sounding pitch matches what the student would hear on their instrument (§6).
-- [ ] Set synth timbre from the instrument's GM program.
-- [ ] Stop/replay controls.
+### Slice 4 — Difficulty + richer generation (§4, §5)
+- [ ] `[test]` Grade→difficulty config object keyed 1–8 (§5).
+- [ ] `[test]` Generator consumes grade params (bars, time-sig set, key range, shortest note, max leap, tempo). **Done:** output respects each grade's constraints; tested per grade.
+- [ ] `[test]` Leap-resolution rule: step in the opposite direction after a leap larger than a third.
+- [ ] `[test]` Phrase structure + repetition/sequence schemes (AABA, diatonic sequence, vary), grade-selected.
+- [ ] `[test]` Cadential logic: interior phrases land on degree 2 or 5, the final phrase on degree 1.
+- [ ] `[test]` Rest insertion per the grade's rest probability.
+- [ ] `[test]` Additional time signatures + their rhythm cells (3/4, 2/4, 6/8, and up per §5).
+- [ ] `[test]` Accidentals / key-signature breadth per grade.
 
-### Phase 4 — Countdown & attempt flow (§7)
-- [ ] On "Let's go": generate piece, render it immediately (student reads during prep), start countdown.
-- [ ] Visible countdown timer with a Skip button.
-- [ ] At zero: large "PLAY NOW!" banner; if metronome-on-attempt, start a count-in (one bar of clicks) then a steady click at the piece tempo.
-- [ ] "New piece" / "Try again (same piece)" controls. "Same piece" re-uses the stored seed.
+**Manual checkpoints (end of slice):**
+- [ ] `[manual]` Spot-check generated pieces at grades 3, 5, and 8: each renders cleanly and sounds musical (ear check per §4).
 
-### Phase 5 — Self-assessment & history
-- [ ] After the attempt, show the self-assessment form (the 5 dimensions in `AttemptLog`).
-- [ ] Save attempt to localStorage, linked to `pieceId`.
-- [ ] Simple history view: list of past attempts with date, grade, and ratings; show trend (even just average-over-time per dimension).
+### Slice 5 — Playback fidelity (§6)
+- [ ] `[test]` Transposition math `soundingMidi = writtenMidi + soundingOffsetSemitones`, applied at synth time (`%%MIDI transpose` / synth option), never to the SVG. **Done:** offset math unit-tested across the §6 instruments.
+- [ ] Set synth timbre from the instrument's GM program (`%%MIDI program` / `options.program`).
+- [ ] Stop / replay controls.
+- [ ] Attempt metronome: one-bar count-in then a steady click at the piece tempo, armed by the "Let's go" gesture.
 
-### Phase 6 — Tablet-first layout & iOS polish (§9)
-- [ ] Responsive layout: landscape = score-dominant with a slim controls rail; portrait = stacked; phone = single column with scroll.
-- [ ] Re-render the score on resize/orientation change (debounced).
-- [ ] Large, high-contrast countdown timer and "PLAY NOW!" banner, readable from music-stand distance.
-- [ ] 44 pt touch targets; no hover-only UI; suppress double-tap zoom and stray text selection.
-- [ ] iOS audio unlock on user gesture; `dvh` + safe-area handling; Wake Lock during prep + attempt.
-- [ ] (Stretch) PWA manifest for full-screen "add to home screen" practice.
+**Manual checkpoints (end of slice):**
+- [ ] `[manual]` Written C on a B♭ clarinet sounds as concert B♭; each instrument plays in its own timbre.
+- [ ] `[manual]` The attempt metronome counts in one bar then clicks steadily at tempo.
+
+### Slice 6 — Dynamics & articulation (§4 step 5)
+- [ ] `[test]` Dynamics layer: phrase-start markings, grade-gated; serializer emits the correct abc decorations (`!p!`, `!f!`, `!crescendo(!`, …).
+- [ ] `[test]` Articulation layer: slurs / staccato / accent / tenuto, grade-gated.
+
+**Manual checkpoints (end of slice):**
+- [ ] `[manual]` Dynamics and articulation render on the score and audibly affect playback where abcjs supports it.
+
+### Slice 7 — Rhythm-only mode (§8)
+- [ ] `[test]` Rhythm-only generation: reuse the rhythm cells, single fixed pitch, single-line presentation.
+- [ ] Rhythm-only playback uses a woodblock/percussion timbre.
+
+**Manual checkpoints (end of slice):**
+- [ ] `[manual]` Rhythm-only mode shows a single-line staff and plays a percussion click with no pitch.
+
+### Slice 8 — Tablet-first layout & iOS polish (§9)
+This slice is device work; the one auto-verifiable util aside, verify the batch on an iPad in Safari.
+- [ ] `[test]` Debounce util, then wire debounced re-render on resize / orientation change.
+
+**Manual checkpoints (verify on an iPad in Safari):**
+- [ ] `[manual]` Responsive layout: landscape score-dominant + slim rail; portrait stacked; phone single-column scroll.
+- [ ] `[manual]` Score re-renders crisply on resize / orientation change.
+- [ ] `[manual]` Countdown + "PLAY NOW!" banner legible from a stand.
+- [ ] `[manual]` 44 pt touch targets; no hover-only UI; double-tap zoom + stray selection suppressed.
+- [ ] `[manual]` iOS AudioContext unlocks on a user gesture (audio works on iPad, not just desktop).
+- [ ] `[manual]` `dvh` + `env(safe-area-inset-*)` handled; nothing sits under the notch / home indicator.
+- [ ] `[manual]` Wake Lock holds during prep + attempt; graceful no-op where unsupported.
+- [ ] `[manual]` (Stretch) PWA manifest enables full-screen "add to home screen".
 
 ---
 
@@ -274,13 +336,6 @@ These are deliberately excluded to keep the POC small. Note them so they aren't 
 
 ---
 
-## 11. Suggested first vertical slice (to de-risk)
+## 11. De-risking note
 
-Before building the full grade table, get one thin path working end to end:
-1. Hardcode: Piano, treble clef, grade 1, 4/4, C major, 4 bars.
-2. Generate with stepwise bias + start/end on C, serialize to abc, render.
-3. Wire `prime()` + Play with a spinner; confirm audio actually sounds.
-4. Add the 60s countdown + "PLAY NOW" banner.
-5. Add the self-assessment form + localStorage history.
-
-Once that loop works and *sounds musical*, expand the instrument table, grades, transposition, dynamics/articulation, and rhythm-only mode. Getting audio to make sound at all is historically the riskiest part — do it early.
+The thin end-to-end path is **Slices 0–2** of §3: scaffolding, the abcjs spike, and the attempt flow around a hardcoded grade-1 piano piece. Build those in order before any breadth (instruments, grades, transposition, dynamics, rhythm-only). Getting the synth to make sound at all is historically the riskiest part, which is why the spike sits in Slice 1. Once that loop works and sounds musical, the remaining slices expand it.
