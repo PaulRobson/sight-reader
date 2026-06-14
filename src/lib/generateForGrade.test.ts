@@ -93,6 +93,38 @@ describe("generateForGrade", () => {
 		expect(pinned.key).toBe("C");
 	});
 
+	it("never emits two whole-bar rests in a row", () => {
+		const barAllRest = (m: ReturnType<typeof generateForGrade>): boolean[] => {
+			const flags: boolean[] = [];
+			let acc = 0;
+			let all = true;
+			for (const n of m.notes) {
+				all = all && !!n.rest;
+				acc += n.duration;
+				if (acc % m.barUnits === 0) {
+					flags.push(all);
+					all = true;
+				}
+			}
+			return flags;
+		};
+		for (const grade of [4, 5, 6, 7, 8] as Grade[]) {
+			for (let seed = 1; seed <= 15; seed++) {
+				const flags = barAllRest(
+					generateForGrade({
+						grade,
+						key: KEY,
+						lowestMidi: LO,
+						highestMidi: HI,
+						seed,
+					}),
+				);
+				for (let i = 1; i < flags.length; i++)
+					expect(flags[i] && flags[i - 1]).toBe(false);
+			}
+		}
+	});
+
 	it("ramps rhythm: no sub-quarter notes at grade 1, sixteenths reachable high up", () => {
 		for (let seed = 1; seed <= 10; seed++) {
 			const m = generateForGrade({

@@ -16,3 +16,26 @@ export function insertRests(
 		return interior && rng() < probability ? { ...note, rest: true } : note;
 	});
 }
+
+// No more than one whole-bar rest in a row: when a bar is entirely rests and the
+// previous bar was too, restore (un-rest) this bar's first slot so the line is
+// never silent for two bars running. The retained pitch is reused.
+export function limitFullBarRests(notes: Note[], barUnits: number): Note[] {
+	const out = notes.map((n) => ({ ...n }));
+	let acc = 0;
+	let barStart = 0;
+	let prevBarAllRest = false;
+	for (let i = 0; i < out.length; i++) {
+		acc += out[i].duration;
+		if (acc % barUnits !== 0) continue;
+		const allRest = out.slice(barStart, i + 1).every((n) => n.rest);
+		if (allRest && prevBarAllRest) {
+			out[barStart].rest = false;
+			prevBarAllRest = false;
+		} else {
+			prevBarAllRest = allRest;
+		}
+		barStart = i + 1;
+	}
+	return out;
+}
