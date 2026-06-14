@@ -3,6 +3,7 @@ import type { Settings } from "../lib/useSettings.ts";
 import { ClefSelector } from "./ClefSelector.tsx";
 import { GradeSelect } from "./GradeSelect.tsx";
 import { InstrumentPicker } from "./InstrumentPicker.tsx";
+import { ModeToggle } from "./ModeToggle.tsx";
 
 type Props = {
 	settings: Settings;
@@ -30,6 +31,7 @@ export function SettingsPanel({ settings, update }: Props) {
 				value={settings.grade}
 				onChange={(grade) => update({ grade })}
 			/>
+			<ModeToggle value={settings.mode} onChange={(mode) => update({ mode })} />
 		</section>
 	);
 }

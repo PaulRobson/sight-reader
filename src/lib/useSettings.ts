@@ -4,7 +4,7 @@ import { storage } from "./storage.ts";
 
 // §2 Settings. Only instrumentId has a control so far; the remaining fields
 // carry defaults until their Slice 3 controls land.
-type Mode = "melodic" | "rhythm-only";
+export type Mode = "melodic" | "rhythm-only";
 
 export type Settings = {
 	instrumentId: string;
