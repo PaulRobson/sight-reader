@@ -28,6 +28,16 @@ main {
 	padding: 0.6rem 1.2rem;
 }
 
+.play-now-banner {
+	font-size: clamp(3rem, 14vw, 9rem);
+	font-weight: 800;
+	letter-spacing: 0.04em;
+	text-align: center;
+	padding: 1rem;
+	background: CanvasText;
+	color: Canvas;
+}
+
 .spinner {
 	display: inline-block;
 	width: 1em;

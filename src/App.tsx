@@ -36,6 +36,11 @@ export default function App() {
 					onDone={() => dispatch({ type: "countdownDone" })}
 				/>
 			) : null}
+			{view === "playNow" ? (
+				<section className="play-now-banner" aria-label="play now">
+					PLAY NOW!
+				</section>
+			) : null}
 			<nav>
 				<button type="button" onClick={letsGo}>
 					Let's go
