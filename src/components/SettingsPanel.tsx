@@ -5,6 +5,7 @@ import { CountdownInput } from "./CountdownInput.tsx";
 import { GradeSelect } from "./GradeSelect.tsx";
 import { InstrumentPicker } from "./InstrumentPicker.tsx";
 import { ModeToggle } from "./ModeToggle.tsx";
+import { Toggle } from "./Toggle.tsx";
 
 type Props = {
 	settings: Settings;
@@ -36,6 +37,11 @@ export function SettingsPanel({ settings, update }: Props) {
 			<CountdownInput
 				value={settings.countdownSeconds}
 				onChange={(countdownSeconds) => update({ countdownSeconds })}
+			/>
+			<Toggle
+				label="Metronome during attempt"
+				checked={settings.metronomeOnAttempt}
+				onChange={(metronomeOnAttempt) => update({ metronomeOnAttempt })}
 			/>
 		</section>
 	);

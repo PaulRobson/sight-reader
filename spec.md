@@ -142,7 +142,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] Grade select 1–8.
 - [x] Mode toggle: Melodic / Rhythm-only.
 - [x] Countdown duration input (default 60s, 0 = skip).
-- [ ] Metronome-during-attempt toggle (default on).
+- [x] Metronome-during-attempt toggle (default on).
 - [ ] Reference-before-attempt toggle (default off, §7).
 
 **Manual checkpoints (end of slice):**
