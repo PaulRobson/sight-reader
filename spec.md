@@ -123,7 +123,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] `[manual]` Switched to generator output, a grade-1 piece renders and reads as a simple, singable tune with a clear ending on C (ear check per §4).
 
 ### Slice 2 — Attempt flow around the thin path
-- [ ] "Let's go" generates + renders the piece and enters `prep`. **Done:** the button shows a fresh score.
+- [x] "Let's go" generates + renders the piece and enters `prep`. **Done:** the button shows a fresh score.
 - [ ] `[test]` Countdown timer (default 60s, 0 = skip) with a Skip button. **Done:** counts down and Skip jumps to zero; logic tested with fake timers.
 - [ ] "PLAY NOW!" banner rendered on entering the `playNow` state (large, high-contrast). **Done:** banner element appears on the state transition; build + lint pass.
 - [ ] `[test]` Self-assessment form: the 5 `AttemptLog` dimensions + optional notes. **Done:** produces a valid `AttemptLog`; validation/state tested.

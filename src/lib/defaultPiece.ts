@@ -12,8 +12,8 @@ const GRADE1: GeneratorOptions = {
 	maxLeap: 2,
 };
 
-export function defaultPiece(): string {
-	return toAbc(generateMelody(GRADE1), {
+export function defaultPiece(seed = GRADE1.seed): string {
+	return toAbc(generateMelody({ ...GRADE1, seed }), {
 		program: 0,
 		clef: "treble",
 		tempo: 70,
