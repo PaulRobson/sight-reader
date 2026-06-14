@@ -2,6 +2,8 @@ import { useState } from "react";
 import { AssessmentForm } from "./components/AssessmentForm.tsx";
 import { Countdown } from "./components/Countdown.tsx";
 import { ExerciseView } from "./components/ExerciseView.tsx";
+import type { AttemptLog } from "./lib/assessment.ts";
+import { attempts } from "./lib/attempts.ts";
 import { defaultPiece } from "./lib/defaultPiece.ts";
 import { useViewState, type View } from "./lib/useViewState.ts";
 
@@ -20,11 +22,15 @@ export default function App() {
 	const [seed, setSeed] = useState(1);
 	const [abc, setAbc] = useState(() => defaultPiece());
 
-	function letsGo() {
-		const fresh = Date.now(); // fresh seed -> fresh piece
-		setSeed(fresh);
-		setAbc(defaultPiece(fresh));
+	function start(nextSeed: number) {
+		setSeed(nextSeed);
+		setAbc(defaultPiece(nextSeed));
 		dispatch({ type: "start" });
+	}
+
+	function saveAttempt(log: AttemptLog) {
+		attempts.save(log);
+		dispatch({ type: "saveAttempt" });
 	}
 
 	return (
@@ -46,23 +52,23 @@ export default function App() {
 				</section>
 			) : null}
 			{view === "assess" ? (
-				<AssessmentForm
-					pieceId={`piece-${seed}`}
-					onSubmit={() => dispatch({ type: "saveAttempt" })}
-				/>
+				<AssessmentForm pieceId={`piece-${seed}`} onSubmit={saveAttempt} />
 			) : null}
 			<nav>
-				<button type="button" onClick={letsGo}>
+				<button type="button" onClick={() => start(Date.now())}>
 					Let's go
+				</button>
+				<button type="button" onClick={() => start(seed)}>
+					Try again (same piece)
+				</button>
+				<button type="button" onClick={() => start(Date.now())}>
+					New piece
 				</button>
 				<button
 					type="button"
 					onClick={() => dispatch({ type: "finishAttempt" })}
 				>
 					Finish attempt
-				</button>
-				<button type="button" onClick={() => dispatch({ type: "saveAttempt" })}>
-					Save
 				</button>
 				<button type="button" onClick={() => dispatch({ type: "openHistory" })}>
 					History

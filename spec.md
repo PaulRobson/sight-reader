@@ -127,7 +127,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] `[test]` Countdown timer (default 60s, 0 = skip) with a Skip button. **Done:** counts down and Skip jumps to zero; logic tested with fake timers.
 - [x] "PLAY NOW!" banner rendered on entering the `playNow` state (large, high-contrast). **Done:** banner element appears on the state transition; build + lint pass.
 - [x] `[test]` Self-assessment form: the 5 `AttemptLog` dimensions + optional notes. **Done:** produces a valid `AttemptLog`; validation/state tested.
-- [ ] `[test]` Save attempt to localStorage keyed by `pieceId`; "Try again (same piece)" reuses the seed, "New piece" reseeds. **Done:** attempt persists; same seed regenerates identical abc; tested.
+- [x] `[test]` Save attempt to localStorage keyed by `pieceId`; "Try again (same piece)" reuses the seed, "New piece" reseeds. **Done:** attempt persists; same seed regenerates identical abc; tested.
 - [ ] `[test]` History view: past attempts with date/grade/ratings + per-dimension average. **Done:** list renders; aggregation tested.
 
 **Manual checkpoints (end of slice):**
