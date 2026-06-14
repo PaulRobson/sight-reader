@@ -5,6 +5,19 @@ import {
 	type Melody,
 	type Note,
 } from "./generateMelody.ts";
+import { scale } from "./scale.ts";
+
+// Ascending diatonic ladder so intervals can be measured in scale steps.
+function ladder(key: string, lo: number, hi: number): number[] {
+	const degrees = scale.major(key);
+	const out: number[] = [];
+	for (let octave = 0; octave <= 9; octave++)
+		for (const d of degrees) {
+			const midi = scale.toMidi(d, octave);
+			if (midi >= lo && midi <= hi) out.push(midi);
+		}
+	return out.sort((a, b) => a - b);
+}
 
 const grade1: GeneratorOptions = {
 	seed: 42,
@@ -58,6 +71,38 @@ describe("generateMelody", () => {
 		const m = generateMelody(grade1);
 		const total = m.notes.reduce((s, note) => s + note.duration, 0);
 		expect(total).toBe(grade1.bars * m.barUnits);
+	});
+
+	it("resolves a leap larger than a third by a step in the opposite direction", () => {
+		// Wide range + leap-friendly bias so leaps occur; large maxLeap so leaps
+		// exceed a third. Measured over the free body (excludes the cadence).
+		const lo = 48;
+		const hi = 84;
+		const steps = ladder("C", lo, hi);
+		const leapy: GeneratorOptions = {
+			seed: 1,
+			key: "C",
+			bars: 8,
+			lowestMidi: lo,
+			highestMidi: hi,
+			stepBias: 0.25,
+			maxLeap: 6,
+		};
+		let checked = 0;
+		for (let seed = 1; seed <= 40; seed++) {
+			const idx = generateMelody({ ...leapy, seed }).notes.map((n) =>
+				steps.indexOf(n.midi),
+			);
+			const free = idx.length - 2; // exclude the two cadence notes
+			for (let i = 1; i + 1 < free; i++) {
+				const delta = idx[i] - idx[i - 1];
+				if (Math.abs(delta) > 2) {
+					expect(idx[i + 1] - idx[i]).toBe(-Math.sign(delta));
+					checked++;
+				}
+			}
+		}
+		expect(checked).toBeGreaterThan(0); // rule was actually exercised
 	});
 
 	it("is stepwise-biased on average", () => {
