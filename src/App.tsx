@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AssessmentForm } from "./components/AssessmentForm.tsx";
 import { Countdown } from "./components/Countdown.tsx";
 import { ExerciseView } from "./components/ExerciseView.tsx";
 import { defaultPiece } from "./lib/defaultPiece.ts";
@@ -16,10 +17,13 @@ const labels: Record<View, string> = {
 
 export default function App() {
 	const [view, dispatch] = useViewState();
+	const [seed, setSeed] = useState(1);
 	const [abc, setAbc] = useState(() => defaultPiece());
 
 	function letsGo() {
-		setAbc(defaultPiece(Date.now())); // fresh seed -> fresh piece
+		const fresh = Date.now(); // fresh seed -> fresh piece
+		setSeed(fresh);
+		setAbc(defaultPiece(fresh));
 		dispatch({ type: "start" });
 	}
 
@@ -40,6 +44,12 @@ export default function App() {
 				<section className="play-now-banner" aria-label="play now">
 					PLAY NOW!
 				</section>
+			) : null}
+			{view === "assess" ? (
+				<AssessmentForm
+					pieceId={`piece-${seed}`}
+					onSubmit={() => dispatch({ type: "saveAttempt" })}
+				/>
 			) : null}
 			<nav>
 				<button type="button" onClick={letsGo}>
