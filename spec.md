@@ -186,18 +186,25 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [ ] `[manual]` Rhythm-only mode shows a single-line staff and plays a percussion click with no pitch.
 
 ### Slice 8 — Tablet-first layout & iOS polish (§9)
-This slice is device work; the one auto-verifiable util aside, verify the batch on an iPad in Safari.
-- [ ] `[test]` Debounce util, then wire debounced re-render on resize / orientation change.
+Device work. Each concern is split into an auto implementation task (verified by build + lint, plus a unit test where one is meaningful) and a device check in the Manual checkpoints block. Build them in order; verify the batch together on an iPad in Safari.
+- [ ] `[test]` Debounce util; wire debounced re-render of the score on resize / orientation change.
+- [ ] Responsive layout: landscape score-dominant + slim rail; portrait stacked; phone single-column scroll. **Done:** layout implemented; build + lint pass.
+- [ ] Countdown + "PLAY NOW!" banner styling, sized and high-contrast for music-stand distance. **Done:** styles implemented; build + lint pass.
+- [ ] 44 pt touch targets; remove hover-only affordances; suppress double-tap zoom + stray text selection (`touch-action`, `user-select`). **Done:** implemented; build + lint pass.
+- [ ] iOS AudioContext unlock: create/resume the context inside the Play and "Let's go" gestures. **Done:** unlock wired to those handlers; build + lint pass.
+- [ ] `dvh` + `env(safe-area-inset-*)` handling so nothing sits under the notch / home indicator and `100vh` does not overflow. **Done:** implemented; build + lint pass.
+- [ ] `[test]` Wake Lock helper: request during prep + attempt, release after; no-op where unsupported. **Done:** the unsupported path is tested (no throw); wired to prep/attempt.
+- [ ] (Stretch) PWA manifest for full-screen "add to home screen". **Done:** manifest added; build passes.
 
 **Manual checkpoints (verify on an iPad in Safari):**
-- [ ] `[manual]` Responsive layout: landscape score-dominant + slim rail; portrait stacked; phone single-column scroll.
+- [ ] `[manual]` Layout holds: landscape score-dominant + slim rail, portrait stacked, phone single-column scroll.
 - [ ] `[manual]` Score re-renders crisply on resize / orientation change.
 - [ ] `[manual]` Countdown + "PLAY NOW!" banner legible from a stand.
-- [ ] `[manual]` 44 pt touch targets; no hover-only UI; double-tap zoom + stray selection suppressed.
-- [ ] `[manual]` iOS AudioContext unlocks on a user gesture (audio works on iPad, not just desktop).
-- [ ] `[manual]` `dvh` + `env(safe-area-inset-*)` handled; nothing sits under the notch / home indicator.
-- [ ] `[manual]` Wake Lock holds during prep + attempt; graceful no-op where unsupported.
-- [ ] `[manual]` (Stretch) PWA manifest enables full-screen "add to home screen".
+- [ ] `[manual]` Touch targets comfortable; no double-tap zoom or stray selection on controls.
+- [ ] `[manual]` Audio works on the iPad (AudioContext unlocked on first gesture), not just desktop.
+- [ ] `[manual]` Nothing obscured by the notch / home indicator; height correct with no toolbar overflow.
+- [ ] `[manual]` Wake Lock keeps the screen awake through prep + attempt.
+- [ ] `[manual]` (Stretch) "Add to home screen" launches full-screen.
 
 ---
 
