@@ -43,6 +43,13 @@ export function SettingsPanel({ settings, update }: Props) {
 				checked={settings.metronomeOnAttempt}
 				onChange={(metronomeOnAttempt) => update({ metronomeOnAttempt })}
 			/>
+			<Toggle
+				label="Reference available before attempt"
+				checked={settings.referenceAvailableBeforeAttempt}
+				onChange={(referenceAvailableBeforeAttempt) =>
+					update({ referenceAvailableBeforeAttempt })
+				}
+			/>
 		</section>
 	);
 }
