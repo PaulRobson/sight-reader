@@ -118,9 +118,9 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] Render + Play wiring: render the current abc with `renderAbc` (`responsive: "resize"`) into the exercise view; wire a Play button to `CreateSynth` `init → prime → start` with a priming spinner; gate on `supportsAudio()` (§1). **Done:** build + lint pass (behaviour confirmed in the manual batch below).
 
 **Manual checkpoints (verify together at the end of the slice):**
-- [ ] `[manual]` The hardcoded C-major piece renders as visible SVG in the exercise view.
-- [ ] `[manual]` Play produces audible sound (first tap primes with a visible spinner, then plays).
-- [ ] `[manual]` Switched to generator output, a grade-1 piece renders and reads as a simple, singable tune with a clear ending on C (ear check per §4).
+- [x] `[manual]` The hardcoded C-major piece renders as visible SVG in the exercise view.
+- [x] `[manual]` Play produces audible sound (first tap primes with a visible spinner, then plays).
+- [x] `[manual]` Switched to generator output, a grade-1 piece renders and reads as a simple, singable tune with a clear ending on C (ear check per §4).
 
 ### Slice 2 — Attempt flow around the thin path
 - [ ] "Let's go" generates + renders the piece and enters `prep`. **Done:** the button shows a fresh score.
