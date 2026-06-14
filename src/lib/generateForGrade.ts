@@ -1,16 +1,19 @@
 import type { Melody } from "./generateMelody.ts";
 import { generatePhrased, schemeForGrade } from "./generatePhrased.ts";
 import { type Grade, gradeDifficulty } from "./gradeDifficulty.ts";
+import { insertAccidentals } from "./insertAccidentals.ts";
 import { insertRests } from "./insertRests.ts";
+import { keys } from "./keys.ts";
 import { mulberry32 } from "./mulberry32.ts";
 import { rhythm } from "./rhythm.ts";
+import { scale } from "./scale.ts";
 
 // Phrases are 4 bars (§4); bar counts snap to a multiple so phrases tile evenly.
 const PHRASE_BARS = 4;
 
 type GradeArgs = {
 	grade: Grade;
-	key: string;
+	key?: string; // explicit written key; derived within the grade's breadth if absent
 	lowestMidi: number;
 	highestMidi: number;
 	seed: number;
@@ -41,10 +44,11 @@ export function generateForGrade(
 		p.shortestNoteSixteenths,
 	);
 	const stepBias = Math.max(0.5, 0.9 - (args.grade - 1) * 0.05);
+	const key = args.key ?? keys.pick(p.maxKeyAccidentals, rng);
 
 	const { melody } = generatePhrased({
 		seed: args.seed,
-		key: args.key,
+		key,
 		bars,
 		lowestMidi: args.lowestMidi,
 		highestMidi: args.highestMidi,
@@ -54,6 +58,17 @@ export function generateForGrade(
 		phraseBars: PHRASE_BARS,
 		meter,
 	});
-	const notes = insertRests(melody.notes, p.restProbability, rng);
+	const rested = insertRests(melody.notes, p.restProbability, rng);
+	const scalePitchClasses = new Set(scale.major(key).map((d) => d.pitchClass));
+	const notes = insertAccidentals(
+		rested,
+		p.accidentals,
+		{
+			scalePitchClasses,
+			lowestMidi: args.lowestMidi,
+			highestMidi: args.highestMidi,
+		},
+		rng,
+	);
 	return { ...melody, notes, tempo, timeSignature };
 }

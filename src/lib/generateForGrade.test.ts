@@ -68,6 +68,53 @@ describe("generateForGrade", () => {
 		expect(seen.size).toBeGreaterThan(1); // selection actually spans meters
 	});
 
+	it("derives a key within the grade's signature breadth, and honours an override", () => {
+		const sigSize = (key: string) =>
+			scale.major(key).filter((d) => d.accidental !== 0).length;
+		for (const grade of GRADES) {
+			const max = gradeDifficulty[grade].maxKeyAccidentals;
+			for (let seed = 1; seed <= 8; seed++) {
+				const m = generateForGrade({
+					grade,
+					lowestMidi: LO,
+					highestMidi: HI,
+					seed,
+				});
+				expect(sigSize(m.key)).toBeLessThanOrEqual(max);
+			}
+		}
+		const pinned = generateForGrade({
+			grade: 8,
+			key: "C",
+			lowestMidi: LO,
+			highestMidi: HI,
+			seed: 1,
+		});
+		expect(pinned.key).toBe("C");
+	});
+
+	it("inserts chromatic notes at high grades but none at grade 1", () => {
+		const chromaticCount = (grade: Grade) => {
+			let total = 0;
+			for (let seed = 1; seed <= 10; seed++) {
+				const m = generateForGrade({
+					grade,
+					key: KEY,
+					lowestMidi: LO,
+					highestMidi: HI,
+					seed,
+				});
+				const inKey = new Set(scale.major(KEY).map((d) => d.pitchClass));
+				total += m.notes.filter(
+					(n) => !inKey.has(((n.midi % 12) + 12) % 12),
+				).length;
+			}
+			return total;
+		};
+		expect(chromaticCount(1)).toBe(0); // breadth "none"
+		expect(chromaticCount(8)).toBeGreaterThan(0); // breadth "modulation"
+	});
+
 	for (const grade of GRADES) {
 		describe(`grade ${grade}`, () => {
 			const p = gradeDifficulty[grade];
@@ -99,10 +146,13 @@ describe("generateForGrade", () => {
 				// The last two notes are the cadence; the join into the rewritten
 				// penultimate note is refined by the later leap-resolution/cadential
 				// tasks, so the maxLeap guarantee covers the free body here.
+				// Chromatic notes (off the diatonic ladder) carry no scale-step
+				// interval, so pairs touching one are skipped.
 				const free = m.notes.length - 2;
 				for (let i = 1; i < free; i++) {
 					const a = steps.indexOf(m.notes[i - 1].midi);
 					const b = steps.indexOf(m.notes[i].midi);
+					if (a === -1 || b === -1) continue;
 					expect(Math.abs(b - a)).toBeLessThanOrEqual(p.maxLeapScaleSteps);
 				}
 			});

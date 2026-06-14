@@ -1,6 +1,10 @@
 import abcjs from "abcjs";
 import { describe, expect, it } from "vitest";
-import { type GeneratorOptions, generateMelody } from "./generateMelody.ts";
+import {
+	type GeneratorOptions,
+	generateMelody,
+	type Melody,
+} from "./generateMelody.ts";
 import { rhythm } from "./rhythm.ts";
 import { type SerializeOptions, toAbc } from "./toAbc.ts";
 
@@ -59,6 +63,40 @@ describe("toAbc", () => {
 		expect(tunes[0].warnings).toBeUndefined();
 		// bar lines follow the 6/8 bar length (12 sixteenths)
 		expect((abc.match(/\|/g) ?? []).length).toBe(grade1.bars);
+	});
+
+	it("emits an explicit accidental for a chromatic note and cancels it within the bar", () => {
+		const melody: Melody = {
+			key: "C",
+			bars: 1,
+			barUnits: 16,
+			notes: [
+				{ midi: 60, letter: "C", accidental: 0, octave: 4, duration: 4 },
+				{ midi: 61, letter: "C", accidental: 1, octave: 4, duration: 4 }, // C#
+				{ midi: 60, letter: "C", accidental: 0, octave: 4, duration: 4 }, // natural again
+				{ midi: 62, letter: "D", accidental: 0, octave: 4, duration: 4 },
+			],
+		};
+		const abc = toAbc(melody);
+		expect(abc).toContain("^C"); // the chromatic sharp
+		expect(abc).toContain("=C"); // natural cancels the earlier sharp within the bar
+		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
+	});
+
+	it("renders an in-key sharp via the key signature, with no explicit accidental", () => {
+		const melody: Melody = {
+			key: "G",
+			bars: 1,
+			barUnits: 16,
+			notes: [
+				{ midi: 66, letter: "F", accidental: 1, octave: 4, duration: 8 }, // F# in G
+				{ midi: 67, letter: "G", accidental: 0, octave: 4, duration: 8 },
+			],
+		};
+		const abc = toAbc(melody);
+		expect(abc).toContain("K:G");
+		expect(abc).not.toContain("^F"); // the key signature already sharps F
+		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
 	});
 
 	it("emits z tokens for rested slots and still parses cleanly", () => {

@@ -1,4 +1,5 @@
 import type { Melody, Note } from "./generateMelody.ts";
+import { scale } from "./scale.ts";
 
 export type SerializeOptions = {
 	title?: string;
@@ -16,26 +17,60 @@ const DEFAULTS = {
 	meter: "4/4",
 };
 
+const ACCIDENTAL_PREFIX: Record<number, string> = {
+	"-2": "__",
+	"-1": "_",
+	0: "=",
+	1: "^",
+	2: "^^",
+};
+
+// Default accidental each letter carries from the key signature.
+function keySignature(key: string): Record<string, number> {
+	const sig: Record<string, number> = {};
+	for (const d of scale.major(key)) sig[d.letter] = d.accidental;
+	return sig;
+}
+
 function pitchLetters(note: Note): string {
 	return note.octave >= 5
 		? `${note.letter.toLowerCase()}${"'".repeat(note.octave - 5)}`
 		: `${note.letter.toUpperCase()}${",".repeat(Math.max(0, 4 - note.octave))}`;
 }
 
-// L:1/16, so a slot's duration in sixteenth units is its abc length multiplier;
-// rests use `z`.
-function noteToken(note: Note): string {
-	const base = note.rest ? "z" : pitchLetters(note);
-	return note.duration === 1 ? base : `${base}${note.duration}`;
+// L:1/16, so a slot's duration in sixteenth units is its abc length multiplier.
+// An explicit accidental is emitted only when the note deviates from what's
+// currently in force (key signature, or an earlier accidental this bar), and
+// that deviation is recorded in `bar` so it persists to the bar line.
+function noteToken(
+	note: Note,
+	keySig: Record<string, number>,
+	bar: Record<string, number>,
+): string {
+	if (note.rest) return note.duration === 1 ? "z" : `z${note.duration}`;
+	const id = `${note.letter}${note.octave}`;
+	const inForce = id in bar ? bar[id] : (keySig[note.letter] ?? 0);
+	let prefix = "";
+	if (note.accidental !== inForce) {
+		prefix = ACCIDENTAL_PREFIX[note.accidental] ?? "";
+		bar[id] = note.accidental;
+	}
+	const length = note.duration === 1 ? "" : `${note.duration}`;
+	return `${prefix}${pitchLetters(note)}${length}`;
 }
 
 function noteStream(melody: Melody): string {
+	const keySig = keySignature(melody.key);
 	const parts: string[] = [];
+	let bar: Record<string, number> = {};
 	let acc = 0;
 	for (const note of melody.notes) {
-		parts.push(noteToken(note));
+		parts.push(noteToken(note, keySig, bar));
 		acc += note.duration;
-		if (acc % melody.barUnits === 0) parts.push("|");
+		if (acc % melody.barUnits === 0) {
+			bar = {}; // accidentals reset at the bar line
+			parts.push("|");
+		}
 	}
 	return parts.join(" ");
 }
