@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AssessmentForm } from "./components/AssessmentForm.tsx";
 import { Countdown } from "./components/Countdown.tsx";
 import { ExerciseView } from "./components/ExerciseView.tsx";
+import { HistoryView } from "./components/HistoryView.tsx";
 import type { AttemptLog } from "./lib/assessment.ts";
 import { attempts } from "./lib/attempts.ts";
 import { defaultPiece } from "./lib/defaultPiece.ts";
@@ -54,6 +55,7 @@ export default function App() {
 			{view === "assess" ? (
 				<AssessmentForm pieceId={`piece-${seed}`} onSubmit={saveAttempt} />
 			) : null}
+			{view === "history" ? <HistoryView logs={attempts.all()} /> : null}
 			<nav>
 				<button type="button" onClick={() => start(Date.now())}>
 					Let's go

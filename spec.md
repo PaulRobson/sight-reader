@@ -128,7 +128,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] "PLAY NOW!" banner rendered on entering the `playNow` state (large, high-contrast). **Done:** banner element appears on the state transition; build + lint pass.
 - [x] `[test]` Self-assessment form: the 5 `AttemptLog` dimensions + optional notes. **Done:** produces a valid `AttemptLog`; validation/state tested.
 - [x] `[test]` Save attempt to localStorage keyed by `pieceId`; "Try again (same piece)" reuses the seed, "New piece" reseeds. **Done:** attempt persists; same seed regenerates identical abc; tested.
-- [ ] `[test]` History view: past attempts with date/grade/ratings + per-dimension average. **Done:** list renders; aggregation tested.
+- [x] `[test]` History view: past attempts with date/grade/ratings + per-dimension average. **Done:** list renders; aggregation tested. (Grade is shown as the hardcoded thin-path grade 1: `AttemptLog` (§2) carries no grade and per-attempt grade only becomes real once Slice 3 persists settings/`GeneratedPiece`.)
 
 **Manual checkpoints (end of slice):**
 - [ ] `[manual]` At countdown zero the "PLAY NOW!" banner is readable from music-stand distance.
