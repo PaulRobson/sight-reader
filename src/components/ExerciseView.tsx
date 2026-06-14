@@ -29,7 +29,12 @@ export function ExerciseView({ abc }: Props) {
 
 	return (
 		<section className="exercise">
-			<div ref={scoreRef} role="img" aria-label="exercise score" />
+			<div
+				ref={scoreRef}
+				className="score"
+				role="img"
+				aria-label="exercise score"
+			/>
 			<button
 				type="button"
 				className="play"

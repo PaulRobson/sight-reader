@@ -1,41 +1,343 @@
 :root {
-	font-family: system-ui, "Segoe UI", Roboto, sans-serif;
-	color-scheme: light dark;
+	--font-body: "DM Sans", system-ui, "Segoe UI", Roboto, sans-serif;
+	--font-display: "Plus Jakarta Sans", var(--font-body);
+
+	/* Cool-grey desk + paper + ink */
+	--surface: #e0e5ec;
+	--paper: #f4f6fa;
+	--ink: #1f2733;
+	--text: #3d4852;
+	--muted: #6b7280;
+
+	/* Ink & brass accent */
+	--accent: #8a5a22;
+	--accent-soft: #b07a2e;
+	--accent-dark: #6e481b;
+	--success: #38b2ac;
+
+	/* RGBA shadow colours (never opaque hex) */
+	--sh-dark: rgba(163, 177, 198, 0.6);
+	--sh-dark-strong: rgba(163, 177, 198, 0.7);
+	--sh-light: rgba(255, 255, 255, 0.55);
+	--sh-light-strong: rgba(255, 255, 255, 0.6);
+
+	/* Depth tokens */
+	--extrude: 9px 9px 16px var(--sh-dark), -9px -9px 16px var(--sh-light);
+	--extrude-hover:
+		12px 12px 20px var(--sh-dark-strong),
+		-12px -12px 20px var(--sh-light-strong);
+	--extrude-sm: 5px 5px 10px var(--sh-dark), -5px -5px 10px var(--sh-light);
+	--inset:
+		inset 6px 6px 10px var(--sh-dark), inset -6px -6px 10px var(--sh-light);
+	--inset-deep:
+		inset 10px 10px 20px var(--sh-dark-strong),
+		inset -10px -10px 20px var(--sh-light-strong);
+	--inset-sm:
+		inset 3px 3px 6px var(--sh-dark), inset -3px -3px 6px var(--sh-light);
+
+	--r-card: 30px;
+	--r-control: 16px;
+	--r-inner: 12px;
+
+	font-family: var(--font-body);
+	color: var(--text);
+}
+
+* {
+	box-sizing: border-box;
 }
 
 body {
 	margin: 0;
+	background: var(--surface);
+	color: var(--text);
+	-webkit-font-smoothing: antialiased;
 }
 
 main {
 	display: flex;
 	flex-direction: column;
-	min-height: 100vh;
-	padding: 1rem;
-	gap: 1rem;
-	box-sizing: border-box;
+	min-height: 100dvh;
+	max-width: 64rem;
+	margin: 0 auto;
+	padding: 1.5rem;
+	gap: 1.5rem;
 }
 
+h1 {
+	font-family: var(--font-display);
+	font-weight: 800;
+	font-size: clamp(1.5rem, 4vw, 2.25rem);
+	letter-spacing: -0.02em;
+	margin: 0;
+	color: var(--text);
+}
+
+.view-label {
+	margin: 0;
+}
+
+.view-label p {
+	margin: 0;
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 0.8rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+/* Score: a sheet of manuscript paper resting in a pressed tray */
 .exercise {
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
 }
 
+.score {
+	background: var(--paper);
+	border-radius: 10px;
+	padding: 1.25rem 1.5rem;
+	box-shadow:
+		inset 2px 2px 4px var(--sh-dark),
+		inset -2px -2px 4px var(--sh-light);
+}
+
+/* Buttons — flat: outlined secondary, solid primary */
+button {
+	font: inherit;
+	font-weight: 600;
+	color: var(--text);
+	background: transparent;
+	border: 1.5px solid var(--muted);
+	border-radius: var(--r-control);
+	padding: 0.7rem 1.25rem;
+	min-height: 44px;
+	cursor: pointer;
+	transition:
+		background 0.2s ease-out,
+		border-color 0.2s ease-out,
+		color 0.2s ease-out;
+}
+
+button:hover {
+	border-color: var(--text);
+	background: rgba(31, 39, 51, 0.05);
+}
+
+button:active {
+	transform: translateY(0.5px);
+}
+
+button:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+button:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+.primary,
+.play {
+	color: var(--paper);
+	background: var(--accent);
+	border-color: var(--accent);
+}
+
+.primary:hover,
+.play:hover {
+	color: var(--paper);
+	background: var(--accent-dark);
+	border-color: var(--accent-dark);
+}
+
 .play {
 	align-self: flex-start;
-	font-size: 1.25rem;
-	padding: 0.6rem 1.2rem;
+	font-size: 1.1rem;
+}
+
+nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-top: auto;
+}
+
+/* Form controls — pressed wells */
+select,
+textarea,
+input[type="number"] {
+	font: inherit;
+	color: var(--text);
+	background: var(--surface);
+	border: none;
+	border-radius: 9px;
+	padding: 0.55rem 0.8rem;
+	box-shadow: var(--inset);
+	transition: box-shadow 0.3s ease-out;
+}
+
+textarea {
+	width: 100%;
+	min-height: 4rem;
+	resize: vertical;
+}
+
+select:focus,
+textarea:focus,
+input[type="number"]:focus {
+	box-shadow: var(--inset-deep);
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+	flex: none;
+	margin: 0;
+	accent-color: var(--accent);
+	width: 1.1rem;
+	height: 1.1rem;
+}
+
+/* Panels — extruded cards */
+.settings-panel,
+.assessment,
+.history {
+	background: var(--surface);
+	border-radius: var(--r-card);
+	padding: 1.75rem;
+	box-shadow: var(--extrude);
+}
+
+.settings-panel {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+	gap: 1.25rem;
+	align-items: start;
+	border-radius: 16px;
+}
+
+.settings-panel label,
+.assessment-notes {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	font-weight: 500;
+	font-size: 0.9rem;
+	color: var(--muted);
+}
+
+.settings-panel .toggle,
+.mode-toggle label,
+.assessment-dimension label {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.5rem;
+	color: var(--text);
+}
+
+fieldset {
+	border: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+legend {
+	padding: 0;
+	font-weight: 500;
+	font-size: 0.9rem;
+	color: var(--muted);
+}
+
+.clef-selector {
+	color: var(--text);
+}
+
+/* Assessment + history */
+.assessment {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.assessment-dimension {
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.history-list,
+.history-averages {
+	margin: 0;
+	padding: 0;
+}
+
+.history-list {
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.history-list li {
+	padding: 0.75rem 1rem;
+	border-radius: var(--r-inner);
+	box-shadow: var(--inset-sm);
+}
+
+.history-averages {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+	gap: 1rem;
+	margin-top: 1.25rem;
+}
+
+.history-averages dt {
+	font-size: 0.8rem;
+	color: var(--muted);
+}
+
+.history-averages dd {
+	margin: 0;
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 1.5rem;
+	color: var(--accent);
+}
+
+/* Glance-able signals — high contrast, no soft shadow */
+.countdown {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+}
+
+.countdown-value {
+	margin: 0;
+	font-family: var(--font-display);
+	font-weight: 800;
+	font-size: clamp(4rem, 20vw, 12rem);
+	line-height: 1;
+	color: var(--ink);
 }
 
 .play-now-banner {
+	font-family: var(--font-display);
 	font-size: clamp(3rem, 14vw, 9rem);
 	font-weight: 800;
 	letter-spacing: 0.04em;
 	text-align: center;
-	padding: 1rem;
-	background: CanvasText;
-	color: Canvas;
+	padding: 1.5rem 1rem;
+	border-radius: var(--r-card);
+	background: var(--ink);
+	color: var(--paper);
 }
 
 .spinner {
@@ -53,5 +355,18 @@ main {
 @keyframes spin {
 	to {
 		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.spinner {
+		animation: none;
+	}
+
+	button,
+	select,
+	textarea,
+	input[type="number"] {
+		transition: none;
 	}
 }

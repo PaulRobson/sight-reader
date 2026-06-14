@@ -38,7 +38,7 @@ export default function App() {
 	return (
 		<main>
 			<h1>Sight-Reading Trainer</h1>
-			<section aria-label={view}>
+			<section className="view-label" aria-label={view}>
 				<p>{labels[view]}</p>
 			</section>
 			{view === "settings" ? (
@@ -61,7 +61,11 @@ export default function App() {
 			) : null}
 			{view === "history" ? <HistoryView logs={attempts.all()} /> : null}
 			<nav>
-				<button type="button" onClick={() => start(Date.now())}>
+				<button
+					type="button"
+					className="primary"
+					onClick={() => start(Date.now())}
+				>
 					Let's go
 				</button>
 				<button type="button" onClick={() => start(seed)}>
