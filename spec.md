@@ -93,7 +93,7 @@ The piece is stored as an **abcjs string at written pitch**. Transposition for p
 - [ ] Seedable PRNG (e.g. mulberry32) so `GeneratedPiece.seed` reproduces a piece exactly. Do **not** use bare `Math.random()` for generation.
 
 ### Phase 1 — Settings
-- [ ] Instrument picker, backed by an `InstrumentDef[]` table (§6). Start with: Piano, Flute, Violin, Clarinet in B♭, Trumpet in B♭, Alto Sax (E♭), Cello, Guitar.
+- [ ] Instrument picker, backed by an `InstrumentDef[]` table (§6). Start with: Trombone, Cello, Piano, Flute, Violin, Clarinet in B♭, Trumpet in B♭, Alto Sax (E♭), Guitar.
 - [ ] Clef selector (constrained to the instrument's `clefs`; piano shows grand staff).
 - [ ] Grade slider/select 1–8 (drives the difficulty table in §5).
 - [ ] Mode toggle: Melodic / Rhythm-only.
