@@ -32,13 +32,11 @@ run:
       - verify
       - hardcoded-colors
   - name: verify:build
-    command: npx
+    command: npm
     args:
-      - tsc
-      - -b
-      - "&&"
-      - vite
+      - run
       - build
+      - --
       - --logLevel
       - error
   - name: verify:circular-deps
