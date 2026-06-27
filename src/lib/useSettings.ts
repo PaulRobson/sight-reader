@@ -29,6 +29,7 @@ const defaultSettings: Settings = {
 };
 
 export function useSettings() {
+	const [firstRun] = useState(() => !storage.has(KEY));
 	const [settings, setSettings] = useState<Settings>(() =>
 		storage.load<Settings>(KEY, defaultSettings),
 	);
@@ -39,5 +40,5 @@ export function useSettings() {
 			return next;
 		});
 	}
-	return { settings, update };
+	return { settings, update, firstRun };
 }

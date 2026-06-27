@@ -11,13 +11,13 @@ const PLAY_LABELS: Record<AudioStatus, string> = {
 	unsupported: "Audio unavailable",
 	idle: "Play reference",
 	priming: "Loading…",
-	playing: "Playing…",
+	playing: "Stop",
 };
 
 export function ExerciseView({ abc, midiTranspose }: Props) {
 	const scoreRef = useRef<HTMLDivElement>(null);
 	const visualObjRef = useRef<TuneObject | null>(null);
-	const { status, play } = useReferenceAudio(
+	const { status, play, stop } = useReferenceAudio(
 		() => visualObjRef.current,
 		midiTranspose,
 	);
@@ -47,7 +47,7 @@ export function ExerciseView({ abc, midiTranspose }: Props) {
 			<button
 				type="button"
 				className="play"
-				onClick={play}
+				onClick={status === "playing" ? stop : play}
 				disabled={status === "unsupported" || status === "priming"}
 			>
 				{status === "priming" ? (

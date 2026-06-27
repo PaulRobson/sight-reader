@@ -1,4 +1,4 @@
-import abcjs, { type TuneObject } from "abcjs";
+import abcjs, { type MidiBuffer, type TuneObject } from "abcjs";
 import { useRef, useState } from "react";
 
 export type AudioStatus = "unsupported" | "idle" | "priming" | "playing";
@@ -16,6 +16,7 @@ export function useReferenceAudio(
 		supported ? "idle" : "unsupported",
 	);
 	const ctxRef = useRef<AudioContext | null>(null);
+	const synthRef = useRef<MidiBuffer | null>(null);
 
 	async function play() {
 		const visualObj = getVisualObj();
@@ -28,16 +29,21 @@ export function useReferenceAudio(
 			await synth.init({
 				audioContext: ctxRef.current,
 				visualObj,
-				options: { midiTranspose },
-				onEnded: () => setStatus("idle"),
+				options: { midiTranspose, onEnded: () => setStatus("idle") },
 			});
 			await synth.prime();
 			synth.start();
+			synthRef.current = synth;
 			setStatus("playing");
 		} catch {
 			setStatus("idle");
 		}
 	}
 
-	return { status, play };
+	function stop() {
+		synthRef.current?.stop();
+		setStatus("idle");
+	}
+
+	return { status, play, stop };
 }

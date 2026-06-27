@@ -29,7 +29,8 @@ function midiTransposeForInstrument(instrumentId: string): number {
 
 export default function App() {
 	const [view, dispatch] = useViewState();
-	const { settings, update } = useSettings();
+	const { settings, update, firstRun } = useSettings();
+	const [settingsOpen, setSettingsOpen] = useState(firstRun);
 	const [seed, setSeed] = useState(1);
 	const [abc, setAbc] = useState(() => defaultPiece());
 
@@ -46,33 +47,48 @@ export default function App() {
 
 	return (
 		<main>
-			<h1>Sight-Reading Trainer</h1>
-			<section className="view-label" aria-label={view}>
-				<p>{labels[view]}</p>
-			</section>
-			{view === "settings" ? (
+			<header className="app-header">
+				<h1>Sight-Reading Trainer</h1>
+				<button
+					type="button"
+					className={settingsOpen ? "primary" : undefined}
+					aria-expanded={settingsOpen}
+					onClick={() => setSettingsOpen((open) => !open)}
+				>
+					{settingsOpen ? "Save settings" : "Settings"}
+				</button>
+			</header>
+			{settingsOpen ? (
 				<SettingsPanel settings={settings} update={update} />
-			) : null}
-			<ExerciseView
-				abc={abc}
-				midiTranspose={midiTransposeForInstrument(settings.instrumentId)}
-			/>
-			{view === "prep" ? (
-				<Countdown
-					seconds={settings.countdownSeconds}
-					onDone={() => dispatch({ type: "countdownDone" })}
-				/>
-			) : null}
-			{view === "playNow" ? (
-				<section className="play-now-banner" aria-label="play now">
-					PLAY NOW!
-				</section>
-			) : null}
-			{view === "assess" ? (
-				<AssessmentForm pieceId={`piece-${seed}`} onSubmit={saveAttempt} />
-			) : null}
-			{view === "history" ? <HistoryView logs={attempts.all()} /> : null}
-			<Controls seed={seed} onStart={start} dispatch={dispatch} />
+			) : (
+				<>
+					{view !== "settings" ? (
+						<section className="view-label" aria-label={view}>
+							<p>{labels[view]}</p>
+						</section>
+					) : null}
+					<ExerciseView
+						abc={abc}
+						midiTranspose={midiTransposeForInstrument(settings.instrumentId)}
+					/>
+					{view === "prep" ? (
+						<Countdown
+							seconds={settings.countdownSeconds}
+							onDone={() => dispatch({ type: "countdownDone" })}
+						/>
+					) : null}
+					{view === "playNow" ? (
+						<section className="play-now-banner" aria-label="play now">
+							PLAY NOW!
+						</section>
+					) : null}
+					{view === "assess" ? (
+						<AssessmentForm pieceId={`piece-${seed}`} onSubmit={saveAttempt} />
+					) : null}
+					{view === "history" ? <HistoryView logs={attempts.all()} /> : null}
+					<Controls seed={seed} onStart={start} dispatch={dispatch} />
+				</>
+			)}
 		</main>
 	);
 }

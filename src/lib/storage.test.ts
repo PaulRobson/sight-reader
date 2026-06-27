@@ -53,4 +53,15 @@ describe("storage", () => {
 		storage.save("zero", 0);
 		expect(storage.load("zero", 99)).toBe(0);
 	});
+
+	it("reports presence of a key", () => {
+		expect(storage.has("k")).toBe(false);
+		storage.save("k", 1);
+		expect(storage.has("k")).toBe(true);
+	});
+
+	it("reports a key holding a falsy value as present", () => {
+		storage.save("zero", 0);
+		expect(storage.has("zero")).toBe(true);
+	});
 });

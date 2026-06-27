@@ -13,4 +13,8 @@ export const storage = {
 	save<T>(key: string, value: T): void {
 		globalThis.localStorage?.setItem(key, JSON.stringify(value));
 	},
+	has(key: string): boolean {
+		const raw = globalThis.localStorage?.getItem(key);
+		return raw !== null && raw !== undefined;
+	},
 };
