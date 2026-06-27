@@ -1,9 +1,6 @@
 import { type AttemptLog, assessment } from "../lib/assessment.ts";
 import { history } from "../lib/history.ts";
 
-// Fixed until Slice 3 persists settings/GeneratedPiece; the thin path is grade 1.
-const THIN_PATH_GRADE = 1;
-
 type Props = { logs: AttemptLog[] };
 
 export function HistoryView({ logs }: Props) {
@@ -21,7 +18,7 @@ export function HistoryView({ logs }: Props) {
 				{logs.map((l) => (
 					<li key={`${l.pieceId}-${l.ratedAt}`}>
 						<time>{new Date(l.ratedAt).toLocaleDateString()}</time>
-						<span> · Grade {THIN_PATH_GRADE} · </span>
+						<span> · Grade {l.grade} · </span>
 						{assessment.DIMENSIONS.map((d) => (
 							<span key={d.key} className="history-rating">
 								{d.label}: {l[d.key]}

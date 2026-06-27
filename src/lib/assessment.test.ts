@@ -42,13 +42,14 @@ describe("assessment.isComplete", () => {
 describe("assessment.buildAttemptLog", () => {
 	it("returns null when incomplete", () => {
 		expect(
-			assessment.buildAttemptLog(assessment.emptyDraft, "p1", 100),
+			assessment.buildAttemptLog(assessment.emptyDraft, "p1", 1, 100),
 		).toBeNull();
 	});
 
-	it("produces a valid AttemptLog with pieceId and ratedAt", () => {
-		expect(assessment.buildAttemptLog(full, "p1", 1700)).toEqual({
+	it("produces a valid AttemptLog with pieceId, grade and ratedAt", () => {
+		expect(assessment.buildAttemptLog(full, "p1", 3, 1700)).toEqual({
 			pieceId: "p1",
+			grade: 3,
 			ratedAt: 1700,
 			pitch: 4,
 			rhythm: 3,
@@ -63,12 +64,18 @@ describe("assessment.buildAttemptLog", () => {
 			{ ...full, notes: "  shaky bar 3 " },
 			"p1",
 			1,
+			1,
 		);
 		expect(log?.notes).toBe("shaky bar 3");
 	});
 
 	it("omits notes when blank or whitespace", () => {
-		const log = assessment.buildAttemptLog({ ...full, notes: "   " }, "p1", 1);
+		const log = assessment.buildAttemptLog(
+			{ ...full, notes: "   " },
+			"p1",
+			1,
+			1,
+		);
 		expect(log && "notes" in log).toBe(false);
 	});
 });

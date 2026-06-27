@@ -5,12 +5,9 @@ import { Countdown } from "./components/Countdown.tsx";
 import { ExerciseView } from "./components/ExerciseView.tsx";
 import { HistoryView } from "./components/HistoryView.tsx";
 import { SettingsPanel } from "./components/SettingsPanel.tsx";
-import type { AttemptLog } from "./lib/assessment.ts";
-import { attempts } from "./lib/attempts.ts";
-import { defaultPiece } from "./lib/defaultPiece.ts";
 import { findInstrument } from "./lib/instruments.ts";
-import { pieceForSettings } from "./lib/pieceForSettings.ts";
 import { transposition } from "./lib/transposition.ts";
+import { useAttemptSession } from "./lib/useAttemptSession.ts";
 import { useSettings } from "./lib/useSettings.ts";
 import { useViewState, type View } from "./lib/useViewState.ts";
 
@@ -31,20 +28,10 @@ export default function App() {
 	const [view, dispatch] = useViewState();
 	const { settings, update, firstRun } = useSettings();
 	const [settingsOpen, setSettingsOpen] = useState(firstRun);
-	const [seed, setSeed] = useState(1);
-	const [abc, setAbc] = useState(() => defaultPiece());
-
-	function start() {
-		const nextSeed = Date.now();
-		setSeed(nextSeed);
-		setAbc(pieceForSettings(settings, nextSeed));
-		dispatch({ type: "start" });
-	}
-
-	function saveAttempt(log: AttemptLog) {
-		attempts.save(log);
-		dispatch({ type: "saveAttempt" });
-	}
+	const { seed, abc, grade, logs, start, saveAttempt } = useAttemptSession(
+		settings,
+		dispatch,
+	);
 
 	return (
 		<main>
@@ -85,9 +72,13 @@ export default function App() {
 						</section>
 					) : null}
 					{view === "assess" ? (
-						<AssessmentForm pieceId={`piece-${seed}`} onSubmit={saveAttempt} />
+						<AssessmentForm
+							pieceId={`piece-${seed}`}
+							grade={grade}
+							onSubmit={saveAttempt}
+						/>
 					) : null}
-					{view === "history" ? <HistoryView logs={attempts.all()} /> : null}
+					{view === "history" ? <HistoryView logs={logs} /> : null}
 					<Controls onStart={start} dispatch={dispatch} />
 				</>
 			)}

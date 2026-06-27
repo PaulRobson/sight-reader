@@ -1,8 +1,9 @@
 export type Rating = 1 | 2 | 3 | 4 | 5;
 
-// §2 data model. pieceId + ratedAt come from the attempt context, not the form.
+// §2 data model. pieceId + grade + ratedAt come from the attempt context, not the form.
 export type AttemptLog = {
 	pieceId: string;
+	grade: number;
 	ratedAt: number;
 	pitch: Rating;
 	rhythm: Rating;
@@ -41,6 +42,7 @@ export const assessment = {
 	buildAttemptLog(
 		draft: AssessmentDraft,
 		pieceId: string,
+		grade: number,
 		ratedAt: number,
 	): AttemptLog | null {
 		if (!assessment.isComplete(draft)) return null;
@@ -48,6 +50,7 @@ export const assessment = {
 		const notes = draft.notes.trim();
 		return {
 			pieceId,
+			grade,
 			ratedAt,
 			pitch: r.pitch,
 			rhythm: r.rhythm,

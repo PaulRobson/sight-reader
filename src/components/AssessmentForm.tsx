@@ -9,9 +9,13 @@ import {
 
 const RATINGS: Rating[] = [1, 2, 3, 4, 5];
 
-type Props = { pieceId: string; onSubmit: (log: AttemptLog) => void };
+type Props = {
+	pieceId: string;
+	grade: number;
+	onSubmit: (log: AttemptLog) => void;
+};
 
-export function AssessmentForm({ pieceId, onSubmit }: Props) {
+export function AssessmentForm({ pieceId, grade, onSubmit }: Props) {
 	const [draft, setDraft] = useState<AssessmentDraft>(assessment.emptyDraft);
 
 	function rate(key: Dimension, value: Rating) {
@@ -19,7 +23,7 @@ export function AssessmentForm({ pieceId, onSubmit }: Props) {
 	}
 
 	function submit() {
-		const log = assessment.buildAttemptLog(draft, pieceId, Date.now());
+		const log = assessment.buildAttemptLog(draft, pieceId, grade, Date.now());
 		if (log) onSubmit(log);
 	}
 
