@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AssessmentForm } from "./components/AssessmentForm.tsx";
+import { Controls } from "./components/Controls.tsx";
 import { Countdown } from "./components/Countdown.tsx";
 import { ExerciseView } from "./components/ExerciseView.tsx";
 import { HistoryView } from "./components/HistoryView.tsx";
@@ -7,7 +8,9 @@ import { SettingsPanel } from "./components/SettingsPanel.tsx";
 import type { AttemptLog } from "./lib/assessment.ts";
 import { attempts } from "./lib/attempts.ts";
 import { defaultPiece } from "./lib/defaultPiece.ts";
+import { findInstrument } from "./lib/instruments.ts";
 import { pieceForSettings } from "./lib/pieceForSettings.ts";
+import { transposition } from "./lib/transposition.ts";
 import { useSettings } from "./lib/useSettings.ts";
 import { useViewState, type View } from "./lib/useViewState.ts";
 
@@ -18,6 +21,11 @@ const labels: Record<View, string> = {
 	assess: "Self-assessment",
 	history: "History",
 };
+
+// Sounding-pitch transpose for the synth (§6); the score stays at written pitch.
+function midiTransposeForInstrument(instrumentId: string): number {
+	return transposition.synthMidiTranspose(findInstrument(instrumentId));
+}
 
 export default function App() {
 	const [view, dispatch] = useViewState();
@@ -45,7 +53,10 @@ export default function App() {
 			{view === "settings" ? (
 				<SettingsPanel settings={settings} update={update} />
 			) : null}
-			<ExerciseView abc={abc} />
+			<ExerciseView
+				abc={abc}
+				midiTranspose={midiTransposeForInstrument(settings.instrumentId)}
+			/>
 			{view === "prep" ? (
 				<Countdown
 					seconds={settings.countdownSeconds}
@@ -61,36 +72,7 @@ export default function App() {
 				<AssessmentForm pieceId={`piece-${seed}`} onSubmit={saveAttempt} />
 			) : null}
 			{view === "history" ? <HistoryView logs={attempts.all()} /> : null}
-			<nav>
-				<button
-					type="button"
-					className="primary"
-					onClick={() => start(Date.now())}
-				>
-					Let's go
-				</button>
-				<button type="button" onClick={() => start(seed)}>
-					Try again (same piece)
-				</button>
-				<button type="button" onClick={() => start(Date.now())}>
-					New piece
-				</button>
-				<button
-					type="button"
-					onClick={() => dispatch({ type: "finishAttempt" })}
-				>
-					Finish attempt
-				</button>
-				<button type="button" onClick={() => dispatch({ type: "openHistory" })}>
-					History
-				</button>
-				<button
-					type="button"
-					onClick={() => dispatch({ type: "closeHistory" })}
-				>
-					Back
-				</button>
-			</nav>
+			<Controls seed={seed} onStart={start} dispatch={dispatch} />
 		</main>
 	);
 }

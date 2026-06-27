@@ -41,8 +41,9 @@ export function comfortableRange(
 
 // Written-pitch abc for the current settings + seed: grade drives difficulty,
 // generation sits in a grade-scaled comfortable band around the staff (within
-// the instrument's range), the key is derived per grade. Timbre and
-// transposition stay default here; playback fidelity (§6) arrives in Slice 5.
+// the instrument's range), the key is derived per grade. The abc stays at
+// written pitch; transposition to sounding pitch (§6) is applied at synth time,
+// never baked here. Timbre stays default until the GM-program task.
 export function pieceForSettings(settings: Settings, seed: number): string {
 	const instrument = findInstrument(settings.instrumentId);
 	const grandStaff = isGrandStaff(instrument);

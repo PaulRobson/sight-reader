@@ -5,7 +5,12 @@ export type AudioStatus = "unsupported" | "idle" | "priming" | "playing";
 
 // Wraps abcjs CreateSynth: init -> prime -> start. The AudioContext is created
 // and resumed inside the play handler so the user gesture unlocks audio (iOS).
-export function useReferenceAudio(getVisualObj: () => TuneObject | null) {
+// midiTranspose shifts playback to sounding pitch (§6); it touches the synth
+// only, never the rendered score.
+export function useReferenceAudio(
+	getVisualObj: () => TuneObject | null,
+	midiTranspose: number,
+) {
 	const supported = abcjs.synth.supportsAudio();
 	const [status, setStatus] = useState<AudioStatus>(
 		supported ? "idle" : "unsupported",
@@ -23,6 +28,7 @@ export function useReferenceAudio(getVisualObj: () => TuneObject | null) {
 			await synth.init({
 				audioContext: ctxRef.current,
 				visualObj,
+				options: { midiTranspose },
 				onEnded: () => setStatus("idle"),
 			});
 			await synth.prime();

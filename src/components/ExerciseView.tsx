@@ -5,7 +5,7 @@ import {
 	useReferenceAudio,
 } from "../lib/useReferenceAudio.ts";
 
-type Props = { abc: string };
+type Props = { abc: string; midiTranspose: number };
 
 const PLAY_LABELS: Record<AudioStatus, string> = {
 	unsupported: "Audio unavailable",
@@ -14,10 +14,13 @@ const PLAY_LABELS: Record<AudioStatus, string> = {
 	playing: "Playing…",
 };
 
-export function ExerciseView({ abc }: Props) {
+export function ExerciseView({ abc, midiTranspose }: Props) {
 	const scoreRef = useRef<HTMLDivElement>(null);
 	const visualObjRef = useRef<TuneObject | null>(null);
-	const { status, play } = useReferenceAudio(() => visualObjRef.current);
+	const { status, play } = useReferenceAudio(
+		() => visualObjRef.current,
+		midiTranspose,
+	);
 
 	useEffect(() => {
 		if (!scoreRef.current) return;
