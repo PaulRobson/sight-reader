@@ -280,30 +280,36 @@ legend {
 	gap: 0.5rem;
 }
 
+.history {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.history-heading {
+	margin: 0.5rem 0 0;
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 0.8rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+.history-heading:first-child {
+	margin-top: 0;
+}
+
 .history-list,
 .history-averages {
 	margin: 0;
 	padding: 0;
 }
 
-.history-list {
-	list-style: none;
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-}
-
-.history-list li {
-	padding: 0.75rem 1rem;
-	border-radius: var(--r-inner);
-	box-shadow: var(--inset-sm);
-}
-
 .history-averages {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
 	gap: 1rem;
-	margin-top: 1.25rem;
 }
 
 .history-averages dt {
@@ -317,6 +323,85 @@ legend {
 	font-weight: 700;
 	font-size: 1.5rem;
 	color: var(--accent);
+}
+
+.history-list {
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.history-item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 1rem 1.1rem;
+	border-radius: var(--r-inner);
+	box-shadow: var(--inset-sm);
+}
+
+.history-item-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+
+.history-item-head time {
+	font-family: var(--font-display);
+	font-weight: 600;
+	color: var(--text);
+}
+
+.grade-badge {
+	flex: none;
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--paper);
+	background: var(--accent);
+	padding: 0.25rem 0.65rem;
+	border-radius: 999px;
+}
+
+.history-ratings {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
+	gap: 0.5rem;
+}
+
+.history-rating {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.15rem;
+	padding: 0.5rem 0.4rem;
+	border-radius: var(--r-inner);
+	background: var(--surface);
+	box-shadow: var(--extrude-sm);
+}
+
+.history-rating-value {
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 1.3rem;
+	line-height: 1;
+	color: var(--ink);
+}
+
+.history-rating-label {
+	font-size: 0.7rem;
+	text-align: center;
+	color: var(--muted);
+}
+
+.history-notes {
+	margin: 0;
+	font-size: 0.9rem;
+	font-style: italic;
+	color: var(--text);
 }
 
 /* Glance-able signals — high contrast, no soft shadow */

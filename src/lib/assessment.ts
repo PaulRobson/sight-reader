@@ -25,12 +25,24 @@ export type AssessmentDraft = {
 	notes: string;
 };
 
-const DIMENSIONS: { key: Dimension; label: string }[] = [
-	{ key: "pitch", label: "Pitch" },
-	{ key: "rhythm", label: "Rhythm" },
-	{ key: "keptGoing", label: "Kept going (no stops/restarts)" },
-	{ key: "dynamicsArticulation", label: "Dynamics & articulation" },
-	{ key: "overallConfidence", label: "Overall confidence" },
+const DIMENSIONS: { key: Dimension; label: string; short: string }[] = [
+	{ key: "pitch", label: "Pitch", short: "Pitch" },
+	{ key: "rhythm", label: "Rhythm", short: "Rhythm" },
+	{
+		key: "keptGoing",
+		label: "Kept going (no stops/restarts)",
+		short: "Kept going",
+	},
+	{
+		key: "dynamicsArticulation",
+		label: "Dynamics & articulation",
+		short: "Dynamics",
+	},
+	{
+		key: "overallConfidence",
+		label: "Overall confidence",
+		short: "Confidence",
+	},
 ];
 
 export const assessment = {
