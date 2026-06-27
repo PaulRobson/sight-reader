@@ -34,7 +34,8 @@ export default function App() {
 	const [seed, setSeed] = useState(1);
 	const [abc, setAbc] = useState(() => defaultPiece());
 
-	function start(nextSeed: number) {
+	function start() {
+		const nextSeed = Date.now();
 		setSeed(nextSeed);
 		setAbc(pieceForSettings(settings, nextSeed));
 		dispatch({ type: "start" });
@@ -73,6 +74,7 @@ export default function App() {
 					/>
 					{view === "prep" ? (
 						<Countdown
+							key={seed}
 							seconds={settings.countdownSeconds}
 							onDone={() => dispatch({ type: "countdownDone" })}
 						/>
@@ -86,7 +88,7 @@ export default function App() {
 						<AssessmentForm pieceId={`piece-${seed}`} onSubmit={saveAttempt} />
 					) : null}
 					{view === "history" ? <HistoryView logs={attempts.all()} /> : null}
-					<Controls seed={seed} onStart={start} dispatch={dispatch} />
+					<Controls onStart={start} dispatch={dispatch} />
 				</>
 			)}
 		</main>

@@ -16,9 +16,16 @@ describe("viewReducer", () => {
 	});
 
 	it("ignores events invalid for the current view (no-op)", () => {
-		expect(viewReducer("playNow", { type: "start" })).toBe("playNow");
+		expect(viewReducer("playNow", { type: "countdownDone" })).toBe("playNow");
 		expect(viewReducer("settings", { type: "finishAttempt" })).toBe("settings");
-		expect(viewReducer("history", { type: "start" })).toBe("history");
+		expect(viewReducer("history", { type: "countdownDone" })).toBe("history");
+	});
+
+	it("restarts to prep from any view on start", () => {
+		expect(viewReducer("playNow", { type: "start" })).toBe("prep");
+		expect(viewReducer("assess", { type: "start" })).toBe("prep");
+		expect(viewReducer("history", { type: "start" })).toBe("prep");
+		expect(viewReducer("prep", { type: "start" })).toBe("prep");
 	});
 
 	it("reduces a full session sequence", () => {
