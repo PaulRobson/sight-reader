@@ -196,9 +196,34 @@ describe("toAbc", () => {
 			],
 		};
 		const abc = toAbc(melody);
-		expect(abc).toContain("Z"); // whole-bar rest
-		expect(abc).not.toMatch(/z\d/); // not a run of individual rests
+		expect(abc).toContain("z16"); // one measure-filling rest (abcjs centres it)
+		expect(abc).not.toContain("Z"); // not abc's multi-measure rest (no "1" count)
 		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
+	});
+
+	it("serialises a whole-bar rest in every meter with no warning", () => {
+		for (const [meter, m] of Object.entries(rhythm.meters)) {
+			const abc = toAbc(
+				{
+					key: "C",
+					bars: 1,
+					barUnits: m.barUnits,
+					notes: [
+						{
+							midi: 60,
+							letter: "C",
+							accidental: 0,
+							octave: 4,
+							duration: m.barUnits,
+							rest: true,
+						},
+					],
+				},
+				{ meter },
+			);
+			expect(abc).not.toContain("Z");
+			expect(abcjs.parseOnly(abc)[0].warnings, meter).toBeUndefined();
+		}
 	});
 
 	it("serialises a whole-bar note in every meter with no unrepresentable-duration warning", () => {

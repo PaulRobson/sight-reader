@@ -24,12 +24,17 @@ describe("abcDuration.split", () => {
 });
 
 describe("abcDuration.fullBarRest", () => {
-	it("uses Z for representable bar lengths", () => {
+	it("emits a single measure-filling rest (abcjs centres it as a whole rest)", () => {
 		for (const total of [16, 12, 8, 6, 18, 20, 24, 14])
-			expect(abcDuration.fullBarRest(total)).toBe("Z");
+			expect(abcDuration.fullBarRest(total)).toBe(`z${total}`);
 	});
 
-	it("splits the 5/8 bar rest abcjs can't draw as one Z", () => {
+	it("never uses Z, whose multi-measure count clutters empty grand-staff bars", () => {
+		for (const total of [16, 12, 8, 6, 18, 20, 24, 14, 10])
+			expect(abcDuration.fullBarRest(total)).not.toContain("Z");
+	});
+
+	it("splits the 5/8 bar rest abcjs can't draw as one rest", () => {
 		expect(abcDuration.fullBarRest(10)).toBe("z8 z2");
 	});
 });

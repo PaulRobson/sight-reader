@@ -21,13 +21,15 @@ function split(d: number): number[] {
 
 const lengthOf = (d: number) => (d === 1 ? "" : `${d}`);
 
-// A whole-bar rest is `Z`, except where the bar length can't be one rest (5/8 =
-// 10 sixteenths), where it becomes clean rest values (untied).
+// A whole-bar rest as a duration rest (z16, z24, …), not abc's `Z`: abcjs draws
+// a multi-measure count ("1") above every `Z`, even a single bar, which clutters
+// the empty staff of a grand-staff bar. A measure-filling rest is auto-drawn as a
+// centred whole rest by abcjs regardless of meter, so this stays clean. A bar
+// length abcjs can't draw as one rest (5/8 = 10) still splits into clean values.
 function fullBarRest(total: number): string {
-	const pieces = split(total);
-	return pieces.length === 1
-		? "Z"
-		: pieces.map((p) => `z${lengthOf(p)}`).join(" ");
+	return split(total)
+		.map((p) => `z${lengthOf(p)}`)
+		.join(" ");
 }
 
 // Rest values largest-first. Dotted-quarter (6) covers compound beats; binary
