@@ -23,7 +23,7 @@ type GradeParams = {
 	dynamics: string[];
 	articulations: string[];
 	accidentals: AccidentalBreadth;
-	restProbability: number; // 0..1
+	restProbability: number; // 0..1; flat 0.1 across grades — rests aren't a difficulty axis
 };
 
 export const gradeDifficulty: Record<Grade, GradeParams> = {
@@ -37,7 +37,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["f", "p"],
 		articulations: [],
 		accidentals: "none",
-		restProbability: 0.05,
+		restProbability: 0.1,
 	},
 	2: {
 		bars: [8, 8],
@@ -49,7 +49,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["p", "mp", "mf", "f"],
 		articulations: ["slur"],
 		accidentals: "rare",
-		restProbability: 0.08,
+		restProbability: 0.1,
 	},
 	3: {
 		bars: [8, 12],
@@ -73,7 +73,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["p", "mp", "mf", "f", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "occasional",
-		restProbability: 0.12,
+		restProbability: 0.1,
 	},
 	5: {
 		bars: [12, 16],
@@ -85,7 +85,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "regular",
-		restProbability: 0.14,
+		restProbability: 0.1,
 	},
 	6: {
 		bars: [16, 16],
@@ -107,7 +107,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "chromatic",
-		restProbability: 0.16,
+		restProbability: 0.1,
 	},
 	7: {
 		bars: [16, 20],
@@ -130,7 +130,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "frequent",
-		restProbability: 0.18,
+		restProbability: 0.1,
 	},
 	8: {
 		bars: [20, 24],
@@ -154,6 +154,6 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "modulation",
-		restProbability: 0.2,
+		restProbability: 0.1,
 	},
 };
