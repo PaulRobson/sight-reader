@@ -142,21 +142,26 @@ describe("generateForGrade articulation", () => {
 		}
 	});
 
-	// Grade 4 carries the full articulation palette and only metres whose bar
-	// length is a representable note value, so the serialized abc parses cleanly.
-	it("adds the grade-4 palette, serializing cleanly", () => {
+	// Grade 4 carries the full articulation palette; grade 8 also spans the odd
+	// metres whose whole-bar notes the serializer must tie-split. Both parse clean.
+	it("adds the grade-4+ palette across metres, serializing cleanly", () => {
 		let sawArtic = false;
-		for (let seed = 1; seed <= 12; seed++) {
-			const m = generateForGrade({
-				grade: 4 as Grade,
-				key: "C",
-				lowestMidi: 55,
-				highestMidi: 79,
-				seed,
-			});
-			if (hasArtic(m)) sawArtic = true;
-			const abc = toAbc(m, { tempo: m.tempo, meter: m.timeSignature });
-			expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
+		for (const grade of [4, 8] as Grade[]) {
+			for (let seed = 1; seed <= 12; seed++) {
+				const m = generateForGrade({
+					grade,
+					key: "C",
+					lowestMidi: 55,
+					highestMidi: 79,
+					seed,
+				});
+				if (hasArtic(m)) sawArtic = true;
+				const abc = toAbc(m, { tempo: m.tempo, meter: m.timeSignature });
+				expect(
+					abcjs.parseOnly(abc)[0].warnings,
+					`g${grade} s${seed}`,
+				).toBeUndefined();
+			}
 		}
 		expect(sawArtic).toBe(true);
 	});

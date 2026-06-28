@@ -1,7 +1,6 @@
+import { abcDuration } from "./abcDuration.ts";
 import type { Note } from "./generateMelody.ts";
 import { scale } from "./scale.ts";
-
-const MIDDLE_C = 60;
 
 const ACCIDENTAL_PREFIX: Record<number, string> = {
 	"-2": "__",
@@ -46,19 +45,27 @@ function accidentalToken(
 	return ACCIDENTAL_PREFIX[note.accidental] ?? "";
 }
 
+// Accidental + pitch + length, tie-splitting a non-representable duration into
+// clean noteheads ("-"), with the accidental only on the first.
+function pitchToken(note: Note, acc: string): string {
+	const pitch = pitchLetters(note);
+	return abcDuration
+		.split(note.duration)
+		.map((p, i) => `${i === 0 ? acc : ""}${pitch}${abcDuration.lengthOf(p)}`)
+		.join("-");
+}
+
 // L:1/16, so a slot's duration in sixteenth units is its abc length multiplier;
-// slurs wrap the note in parens, decorations and accidentals prefix it.
+// slurs wrap the note in parens, decorations prefix it.
 function noteToken(
 	note: Note,
 	keySig: Record<string, number>,
 	bar: Record<string, number>,
 ): string {
 	const deco = decorations(note);
-	if (note.rest)
-		return `${deco}${note.duration === 1 ? "z" : `z${note.duration}`}`;
-	const length = note.duration === 1 ? "" : `${note.duration}`;
-	const body = `${deco}${accidentalToken(note, keySig, bar)}${pitchLetters(note)}${length}`;
-	return `${note.slurStart ? "(" : ""}${body}${note.slurEnd ? ")" : ""}`;
+	if (note.rest) return `${deco}z${abcDuration.lengthOf(note.duration)}`;
+	const body = pitchToken(note, accidentalToken(note, keySig, bar));
+	return `${note.slurStart ? "(" : ""}${deco}${body}${note.slurEnd ? ")" : ""}`;
 }
 
 // Sixteenths per beam group: a quarter for simple meters, a dotted quarter for
@@ -71,16 +78,17 @@ function beatUnits(meter: string): number {
 	return 4;
 }
 
-// One bar's tokens. An entirely-rested bar collapses to `Z` (a whole-measure
-// rest). Sub-quarter notes inside the same beat are beamed (no separating
-// space); quarters, rests, and beat boundaries break the beam. Accidentals are
-// local to the bar, so the persistence state starts fresh here.
+// One bar's tokens. An entirely-rested bar collapses to a whole-measure rest.
+// Sub-quarter notes inside the same beat are beamed (no separating space);
+// quarters, rests, and beat boundaries break the beam. Accidentals are local to
+// the bar, so the persistence state starts fresh here.
 function renderBar(
 	notes: Note[],
 	keySig: Record<string, number>,
 	beat: number,
 ): string {
-	if (notes.every((n) => n.rest)) return "Z";
+	if (notes.every((n) => n.rest))
+		return abcDuration.fullBarRest(notes.reduce((s, n) => s + n.duration, 0));
 	const bar: Record<string, number> = {};
 	let out = "";
 	let pos = 0;
@@ -119,23 +127,4 @@ export function noteStream(
 	}
 	if (current.length > 0) bars.push(renderBar(current, keySig, beat));
 	return `${bars.join(" | ")} |`;
-}
-
-// Split a single line across a grand staff: each pitched note goes to the staff
-// for its register, the other staff carries an aligned rest (so bars line up).
-export function splitGrandStaff(notes: Note[]): {
-	treble: Note[];
-	bass: Note[];
-} {
-	const rest = (n: Note): Note => ({
-		...n,
-		rest: true,
-		decorations: undefined,
-		slurStart: undefined,
-		slurEnd: undefined,
-	});
-	return {
-		treble: notes.map((n) => (!n.rest && n.midi >= MIDDLE_C ? n : rest(n))),
-		bass: notes.map((n) => (!n.rest && n.midi < MIDDLE_C ? n : rest(n))),
-	};
 }

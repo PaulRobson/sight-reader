@@ -1,5 +1,6 @@
 import type { Melody } from "./generateMelody.ts";
-import { noteStream, splitGrandStaff } from "./noteStream.ts";
+import { noteStream } from "./noteStream.ts";
+import { splitGrandStaff } from "./splitGrandStaff.ts";
 
 export type SerializeOptions = {
 	title?: string;

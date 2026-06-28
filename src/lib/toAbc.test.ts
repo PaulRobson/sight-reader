@@ -201,6 +201,40 @@ describe("toAbc", () => {
 		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
 	});
 
+	it("serialises a whole-bar note in every meter with no unrepresentable-duration warning", () => {
+		for (const [meter, m] of Object.entries(rhythm.meters)) {
+			const melody: Melody = {
+				key: "C",
+				bars: 1,
+				barUnits: m.barUnits,
+				notes: [
+					{
+						midi: 60,
+						letter: "C",
+						accidental: 0,
+						octave: 4,
+						duration: m.barUnits,
+					},
+				],
+			};
+			const abc = toAbc(melody, { meter });
+			expect(abcjs.parseOnly(abc)[0].warnings, meter).toBeUndefined();
+		}
+		// 5/8's 10-sixteenth bar is the one abcjs can't draw whole, so it ties
+		const fiveEight = toAbc(
+			{
+				key: "C",
+				bars: 1,
+				barUnits: 10,
+				notes: [
+					{ midi: 60, letter: "C", accidental: 0, octave: 4, duration: 10 },
+				],
+			},
+			{ meter: "5/8" },
+		);
+		expect(fiveEight).toContain("C8-C2");
+	});
+
 	it("emits z tokens for rested slots and still parses cleanly", () => {
 		const melody = generateMelody(grade1);
 		melody.notes[1] = { ...melody.notes[1], rest: true };
