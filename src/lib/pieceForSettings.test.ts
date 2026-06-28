@@ -1,6 +1,7 @@
 import abcjs from "abcjs";
 import { describe, expect, it } from "vitest";
 import type { Grade } from "./gradeDifficulty.ts";
+import { findInstrument } from "./instruments.ts";
 import { comfortableRange, pieceForSettings } from "./pieceForSettings.ts";
 import type { Settings } from "./useSettings.ts";
 
@@ -60,6 +61,15 @@ describe("pieceForSettings", () => {
 		expect(abc).toContain("%%score {1 2}");
 		expect(abc).toContain("V:1 clef=treble");
 		expect(abc).toContain("V:2 clef=bass");
+	});
+
+	it("emits the instrument's GM program for the synth timbre", () => {
+		for (const instrumentId of ["flute", "cello", "bflat-clarinet", "guitar"]) {
+			const abc = pieceForSettings({ ...base, instrumentId }, 3);
+			expect(abc).toContain(
+				`%%MIDI program ${findInstrument(instrumentId).gmProgram}`,
+			);
+		}
 	});
 
 	it("reflects the chosen clef and a meter header", () => {

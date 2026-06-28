@@ -43,7 +43,8 @@ export function comfortableRange(
 // generation sits in a grade-scaled comfortable band around the staff (within
 // the instrument's range), the key is derived per grade. The abc stays at
 // written pitch; transposition to sounding pitch (§6) is applied at synth time,
-// never baked here. Timbre stays default until the GM-program task.
+// never baked here. The instrument's GM program sets the synth timbre via the
+// %%MIDI program header the synth reads from the parsed tune.
 export function pieceForSettings(settings: Settings, seed: number): string {
 	const instrument = findInstrument(settings.instrumentId);
 	const grandStaff = isGrandStaff(instrument);
@@ -67,5 +68,6 @@ export function pieceForSettings(settings: Settings, seed: number): string {
 		clef: settings.clef,
 		meter: melody.timeSignature,
 		grandStaff,
+		program: instrument.gmProgram,
 	});
 }

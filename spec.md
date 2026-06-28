@@ -164,7 +164,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 
 ### Slice 5 — Playback fidelity (§6)
 - [x] `[test]` Transposition math `soundingMidi = writtenMidi + soundingOffsetSemitones`, applied at synth time (`%%MIDI transpose` / synth option), never to the SVG. **Done:** `transposition` (`soundingMidi` + `synthMidiTranspose`) implements the §6 math; the offset is applied via the abcjs synth `midiTranspose` option in `useReferenceAudio` (synth only, never the rendered SVG), threaded from `App` per the chosen instrument. Offset math unit-tested across the §6 instruments. (App's `<nav>` extracted to a `Controls` component to keep `App` under the maintainability threshold.)
-- [ ] Set synth timbre from the instrument's GM program (`%%MIDI program` / `options.program`).
+- [x] Set synth timbre from the instrument's GM program (`%%MIDI program` / `options.program`). **Done:** `pieceForSettings` threads the chosen instrument's `gmProgram` into `toAbc`, so the `%%MIDI program` header carries the timbre; the synth reads it from the parsed tune (`init`'s `visualObj`), no separate `options.program` needed. Tested: the emitted abc carries each instrument's GM program.
 - [ ] Stop / replay controls.
 - [ ] Attempt metronome: one-bar count-in then a steady click at the piece tempo, armed by the "Let's go" gesture.
 
