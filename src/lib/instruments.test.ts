@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-	constrainClef,
-	findInstrument,
-	instruments,
-	isGrandStaff,
-} from "./instruments.ts";
+import { constrainClef, findInstrument, instruments } from "./instruments.ts";
 
 const PC: Record<string, number> = {
 	C: 0,
@@ -102,14 +97,5 @@ describe("constrainClef", () => {
 
 	it("falls back to the default clef when unsupported", () => {
 		expect(constrainClef(cello, "treble")).toBe("bass");
-	});
-});
-
-describe("isGrandStaff", () => {
-	it("is true only when treble and bass are both available (piano)", () => {
-		expect(isGrandStaff(findInstrument("piano"))).toBe(true);
-		expect(isGrandStaff(findInstrument("cello"))).toBe(false);
-		expect(isGrandStaff(findInstrument("flute"))).toBe(false);
-		expect(isGrandStaff(findInstrument("trombone"))).toBe(false);
 	});
 });

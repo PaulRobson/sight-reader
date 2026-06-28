@@ -1,8 +1,4 @@
-import {
-	type Clef,
-	type InstrumentDef,
-	isGrandStaff,
-} from "../lib/instruments.ts";
+import type { Clef, InstrumentDef } from "../lib/instruments.ts";
 
 const CLEF_LABELS: Record<Clef, string> = {
 	treble: "Treble",
@@ -18,9 +14,6 @@ type Props = {
 };
 
 export function ClefSelector({ instrument, value, onChange }: Props) {
-	if (isGrandStaff(instrument)) {
-		return <p className="clef-selector">Grand staff (treble + bass)</p>;
-	}
 	return (
 		<label className="clef-selector">
 			Clef

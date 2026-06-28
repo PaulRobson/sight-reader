@@ -1,8 +1,6 @@
 import { type AttemptLog, assessment } from "../lib/assessment.ts";
 import { history } from "../lib/history.ts";
-
-// Fixed until Slice 3 persists settings/GeneratedPiece; the thin path is grade 1.
-const THIN_PATH_GRADE = 1;
+import { HistoryItem } from "./HistoryItem.tsx";
 
 type Props = { logs: AttemptLog[] };
 
@@ -17,27 +15,26 @@ export function HistoryView({ logs }: Props) {
 	}
 	return (
 		<section className="history" aria-label="history">
-			<ol className="history-list">
-				{logs.map((l) => (
-					<li key={`${l.pieceId}-${l.ratedAt}`}>
-						<time>{new Date(l.ratedAt).toLocaleDateString()}</time>
-						<span> · Grade {THIN_PATH_GRADE} · </span>
-						{assessment.DIMENSIONS.map((d) => (
-							<span key={d.key} className="history-rating">
-								{d.label}: {l[d.key]}
-							</span>
-						))}
-					</li>
-				))}
-			</ol>
+			<h3 className="history-heading">
+				Averages over {logs.length} attempt{logs.length === 1 ? "" : "s"}
+			</h3>
 			<dl className="history-averages">
 				{assessment.DIMENSIONS.map((d) => (
 					<div key={d.key}>
-						<dt>{d.label} (avg)</dt>
+						<dt>{d.short}</dt>
 						<dd>{averages[d.key].toFixed(1)}</dd>
 					</div>
 				))}
 			</dl>
+			<h3 className="history-heading">Attempts</h3>
+			<ol className="history-list">
+				{logs
+					.slice()
+					.reverse()
+					.map((l) => (
+						<HistoryItem key={`${l.pieceId}-${l.ratedAt}`} log={l} />
+					))}
+			</ol>
 		</section>
 	);
 }

@@ -1,95 +1,69 @@
 import { useState } from "react";
-import { AssessmentForm } from "./components/AssessmentForm.tsx";
-import { Countdown } from "./components/Countdown.tsx";
-import { ExerciseView } from "./components/ExerciseView.tsx";
+import { AppHeader } from "./components/AppHeader.tsx";
+import { AttemptScreen } from "./components/AttemptScreen.tsx";
 import { HistoryView } from "./components/HistoryView.tsx";
 import { SettingsPanel } from "./components/SettingsPanel.tsx";
-import type { AttemptLog } from "./lib/assessment.ts";
-import { attempts } from "./lib/attempts.ts";
-import { defaultPiece } from "./lib/defaultPiece.ts";
+import { historyNav } from "./lib/historyNav.ts";
+import { useAttemptMetronome } from "./lib/useAttemptMetronome.ts";
+import { useAttemptSession } from "./lib/useAttemptSession.ts";
 import { useSettings } from "./lib/useSettings.ts";
-import { useViewState, type View } from "./lib/useViewState.ts";
-
-const labels: Record<View, string> = {
-	settings: "Settings",
-	prep: "Prep countdown",
-	playNow: "PLAY NOW!",
-	assess: "Self-assessment",
-	history: "History",
-};
+import { useViewState } from "./lib/useViewState.ts";
+import { useWakeLock } from "./lib/useWakeLock.ts";
 
 export default function App() {
 	const [view, dispatch] = useViewState();
-	const { settings, update } = useSettings();
-	const [seed, setSeed] = useState(1);
-	const [abc, setAbc] = useState(() => defaultPiece());
+	const { settings, update, firstRun } = useSettings();
+	const [settingsOpen, setSettingsOpen] = useState(firstRun);
+	const { seed, abc, grade, logs, start, saveAttempt } = useAttemptSession(
+		settings,
+		dispatch,
+	);
+	const armMetronome = useAttemptMetronome(
+		view,
+		abc,
+		settings.metronomeOnAttempt,
+	);
+	// Keep the screen awake through the prep countdown and the attempt (§9).
+	useWakeLock(view === "prep" || view === "playNow");
 
-	function start(nextSeed: number) {
-		setSeed(nextSeed);
-		setAbc(defaultPiece(nextSeed));
-		dispatch({ type: "start" });
+	// Arm inside the gesture so iOS unlocks audio (§9); the count-in fires later
+	// at the countdown-zero transition, which is not itself a gesture.
+	function handleStart() {
+		armMetronome();
+		start();
 	}
 
-	function saveAttempt(log: AttemptLog) {
-		attempts.save(log);
-		dispatch({ type: "saveAttempt" });
-	}
+	const { inHistory, toggleHistory } = historyNav(
+		view,
+		settingsOpen,
+		setSettingsOpen,
+		dispatch,
+	);
 
 	return (
 		<main>
-			<h1>Sight-Reading Trainer</h1>
-			<section className="view-label" aria-label={view}>
-				<p>{labels[view]}</p>
-			</section>
-			{view === "settings" ? (
+			<AppHeader
+				settingsOpen={settingsOpen}
+				onToggleSettings={() => setSettingsOpen((open) => !open)}
+				inHistory={inHistory}
+				onToggleHistory={toggleHistory}
+			/>
+			{settingsOpen ? (
 				<SettingsPanel settings={settings} update={update} />
-			) : null}
-			<ExerciseView abc={abc} />
-			{view === "prep" ? (
-				<Countdown
-					seconds={settings.countdownSeconds}
-					onDone={() => dispatch({ type: "countdownDone" })}
+			) : inHistory ? (
+				<HistoryView logs={logs} />
+			) : (
+				<AttemptScreen
+					view={view}
+					abc={abc}
+					seed={seed}
+					grade={grade}
+					settings={settings}
+					dispatch={dispatch}
+					onStart={handleStart}
+					onSaveAttempt={saveAttempt}
 				/>
-			) : null}
-			{view === "playNow" ? (
-				<section className="play-now-banner" aria-label="play now">
-					PLAY NOW!
-				</section>
-			) : null}
-			{view === "assess" ? (
-				<AssessmentForm pieceId={`piece-${seed}`} onSubmit={saveAttempt} />
-			) : null}
-			{view === "history" ? <HistoryView logs={attempts.all()} /> : null}
-			<nav>
-				<button
-					type="button"
-					className="primary"
-					onClick={() => start(Date.now())}
-				>
-					Let's go
-				</button>
-				<button type="button" onClick={() => start(seed)}>
-					Try again (same piece)
-				</button>
-				<button type="button" onClick={() => start(Date.now())}>
-					New piece
-				</button>
-				<button
-					type="button"
-					onClick={() => dispatch({ type: "finishAttempt" })}
-				>
-					Finish attempt
-				</button>
-				<button type="button" onClick={() => dispatch({ type: "openHistory" })}>
-					History
-				</button>
-				<button
-					type="button"
-					onClick={() => dispatch({ type: "closeHistory" })}
-				>
-					Back
-				</button>
-			</nav>
+			)}
 		</main>
 	);
 }

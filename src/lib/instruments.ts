@@ -33,7 +33,7 @@ export const instruments: InstrumentDef[] = [
 		soundingOffsetSemitones: 0,
 		gmProgram: 42,
 		lowestWrittenNote: "C2",
-		highestWrittenNote: "A5",
+		highestWrittenNote: "C6",
 	},
 	{
 		id: "piano",
@@ -53,7 +53,7 @@ export const instruments: InstrumentDef[] = [
 		soundingOffsetSemitones: 0,
 		gmProgram: 73,
 		lowestWrittenNote: "C4",
-		highestWrittenNote: "D7",
+		highestWrittenNote: "C7",
 	},
 	{
 		id: "violin",
@@ -63,7 +63,7 @@ export const instruments: InstrumentDef[] = [
 		soundingOffsetSemitones: 0,
 		gmProgram: 40,
 		lowestWrittenNote: "G3",
-		highestWrittenNote: "A7",
+		highestWrittenNote: "E7",
 	},
 	{
 		id: "bflat-clarinet",
@@ -73,7 +73,7 @@ export const instruments: InstrumentDef[] = [
 		soundingOffsetSemitones: -2,
 		gmProgram: 71,
 		lowestWrittenNote: "E3",
-		highestWrittenNote: "C6",
+		highestWrittenNote: "G6",
 	},
 	{
 		id: "bflat-trumpet",
@@ -83,7 +83,7 @@ export const instruments: InstrumentDef[] = [
 		soundingOffsetSemitones: -2,
 		gmProgram: 56,
 		lowestWrittenNote: "F#3",
-		highestWrittenNote: "C6",
+		highestWrittenNote: "D6",
 	},
 	{
 		id: "alto-sax",
@@ -107,6 +107,47 @@ export const instruments: InstrumentDef[] = [
 	},
 ];
 
+const PITCH_CLASS: Record<string, number> = {
+	C: 0,
+	D: 2,
+	E: 4,
+	F: 5,
+	G: 7,
+	A: 9,
+	B: 11,
+};
+
+// Scientific pitch notation (e.g. "F#3", "Bb4", "C8") to MIDI; C4 = 60. The
+// instrument table is the only caller, so malformed input is a programmer error.
+export function spnToMidi(spn: string): number {
+	const m = /^([A-G])(#+|b+)?(-?\d)$/.exec(spn);
+	if (!m) throw new Error(`invalid scientific pitch notation: ${spn}`);
+	const [, letter, acc, octave] = m;
+	const alter = acc ? (acc[0] === "#" ? acc.length : -acc.length) : 0;
+	return 12 * (Number(octave) + 1) + PITCH_CLASS[letter] + alter;
+}
+
+const SHARP_NAMES = [
+	"C",
+	"C♯",
+	"D",
+	"D♯",
+	"E",
+	"F",
+	"F♯",
+	"G",
+	"G♯",
+	"A",
+	"A♯",
+	"B",
+];
+
+// MIDI to a display note name (sharps), e.g. 60 -> "C4", 61 -> "C♯4".
+export function midiToNoteName(midi: number): string {
+	const octave = Math.floor(midi / 12) - 1;
+	return `${SHARP_NAMES[((midi % 12) + 12) % 12]}${octave}`;
+}
+
 export function findInstrument(id: string): InstrumentDef {
 	return instruments.find((i) => i.id === id) ?? instruments[0];
 }
@@ -114,11 +155,4 @@ export function findInstrument(id: string): InstrumentDef {
 // Keep a stored clef only if the instrument supports it; otherwise its default.
 export function constrainClef(instrument: InstrumentDef, clef: Clef): Clef {
 	return instrument.clefs.includes(clef) ? clef : instrument.defaultClef;
-}
-
-// Treble + bass together = grand staff (piano), shown as one staff pair.
-export function isGrandStaff(instrument: InstrumentDef): boolean {
-	return (
-		instrument.clefs.includes("treble") && instrument.clefs.includes("bass")
-	);
 }

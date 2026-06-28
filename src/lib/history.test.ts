@@ -5,6 +5,7 @@ import { history } from "./history.ts";
 function log(overrides: Partial<AttemptLog>): AttemptLog {
 	return {
 		pieceId: "p1",
+		grade: 1,
 		ratedAt: 1,
 		pitch: 3,
 		rhythm: 3,

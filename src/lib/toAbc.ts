@@ -1,47 +1,40 @@
-import type { Melody, Note } from "./generateMelody.ts";
+import type { Melody } from "./generateMelody.ts";
+import { noteStream } from "./noteStream.ts";
 
 export type SerializeOptions = {
 	title?: string;
 	tempo?: number; // BPM for the quarter note (Q:1/4=...)
 	program?: number; // General MIDI program
 	clef?: string; // "treble" | "bass" | "alto" | "tenor"
+	meter?: string; // time signature, e.g. "3/4"; bar lines follow melody.barUnits
+	percussion?: boolean; // single-line percussion staff (rhythm-only, §8)
 };
 
-const DEFAULTS = { title: "Exercise", tempo: 70, program: 0, clef: "treble" };
-
-// L:1/16, so a note's duration in sixteenth units is its abc length multiplier.
-function pitchToken(note: Note): string {
-	const base =
-		note.octave >= 5
-			? `${note.letter.toLowerCase()}${"'".repeat(note.octave - 5)}`
-			: `${note.letter.toUpperCase()}${",".repeat(Math.max(0, 4 - note.octave))}`;
-	return note.duration === 1 ? base : `${base}${note.duration}`;
-}
-
-function noteStream(melody: Melody): string {
-	const parts: string[] = [];
-	let acc = 0;
-	for (const note of melody.notes) {
-		parts.push(pitchToken(note));
-		acc += note.duration;
-		if (acc % melody.barUnits === 0) parts.push("|");
-	}
-	return parts.join(" ");
-}
+const DEFAULTS = {
+	title: "Exercise",
+	tempo: 70,
+	program: 0,
+	clef: "treble",
+	meter: "4/4",
+	percussion: false,
+};
 
 // Written pitch only; transposition is applied at synth time, never here.
-// Meter is fixed at 4/4 for the thin path (the only time signature the
-// generator emits so far); richer meters arrive with Slice 4.
+// L:1/16 is the default note length for every meter, so durations stay integer
+// length multipliers; bar lines and beaming come from noteStream.
 export function toAbc(melody: Melody, options: SerializeOptions = {}): string {
-	const { title, tempo, program, clef } = { ...DEFAULTS, ...options };
+	const { title, tempo, program, clef, meter, percussion } = {
+		...DEFAULTS,
+		...options,
+	};
+	const head = ["X:1", `T:${title}`, `M:${meter}`, "L:1/16", `Q:1/4=${tempo}`];
+	const keyLine = percussion
+		? `K:${melody.key} clef=perc stafflines=1`
+		: `K:${melody.key} clef=${clef}`;
 	return [
-		"X:1",
-		`T:${title}`,
-		"M:4/4",
-		"L:1/16",
-		`Q:1/4=${tempo}`,
-		`K:${melody.key} clef=${clef}`,
+		...head,
+		keyLine,
 		`%%MIDI program ${program}`,
-		noteStream(melody),
+		noteStream(melody.key, melody.barUnits, melody.notes, meter),
 	].join("\n");
 }

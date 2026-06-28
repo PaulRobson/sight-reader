@@ -1,18 +1,33 @@
-import { generateMelody, type Melody } from "./generateMelody.ts";
+import { applyArticulations } from "./applyArticulations.ts";
+import { applyDynamics } from "./applyDynamics.ts";
+import type { Melody } from "./generateMelody.ts";
+import { generatePhrased, schemeForGrade } from "./generatePhrased.ts";
 import { type Grade, gradeDifficulty } from "./gradeDifficulty.ts";
+import { gradeRhythmPlan } from "./gradeRhythmPlan.ts";
+import { insertAccidentals } from "./insertAccidentals.ts";
+import { insertRests, preventFullBarRests } from "./insertRests.ts";
+import { keys } from "./keys.ts";
 import { mulberry32 } from "./mulberry32.ts";
+import { raiseLeadingTones } from "./raiseLeadingTones.ts";
+import { scale } from "./scale.ts";
 
-// Meters we currently have rhythm cells for. The richer time-signature task
-// widens this; until then meter selection collapses to 4/4.
-const CELL_METERS = ["4/4"];
+// Phrases are 4 bars (§4); bar counts snap to a multiple so phrases tile evenly.
+const PHRASE_BARS = 4;
 
 type GradeArgs = {
 	grade: Grade;
-	key: string;
+	key?: string; // explicit written key; derived within the grade's breadth if absent
 	lowestMidi: number;
 	highestMidi: number;
 	seed: number;
+	centerMidi?: number; // tessitura anchor; defaults to the range midpoint
 };
+
+// Snap a raw bar count to a whole number of phrases. Every grade's min/max are
+// multiples of PHRASE_BARS, so the result stays inside the grade's range.
+function snapBars(raw: number): number {
+	return Math.max(PHRASE_BARS, Math.round(raw / PHRASE_BARS) * PHRASE_BARS);
+}
 
 // Derives generator options from the §5 grade table, then generates. stepBias
 // is not a §5 column; it falls with grade so higher grades leap more.
@@ -21,21 +36,60 @@ export function generateForGrade(
 ): Melody & { tempo: number; timeSignature: string } {
 	const p = gradeDifficulty[args.grade];
 	const rng = mulberry32(args.seed);
-	const bars = p.bars[0] + Math.floor(rng() * (p.bars[1] - p.bars[0] + 1));
-	const tempo =
-		p.tempoBpm[0] + Math.floor(rng() * (p.tempoBpm[1] - p.tempoBpm[0] + 1));
-	const meters = p.timeSignatures.filter((m) => CELL_METERS.includes(m));
-	const timeSignature = meters[Math.floor(rng() * meters.length)] ?? "4/4";
+	const plan = gradeRhythmPlan(p, rng);
+	const bars = snapBars(plan.bars);
+	const { tempo, timeSignature, meter } = plan;
 	const stepBias = Math.max(0.5, 0.9 - (args.grade - 1) * 0.05);
+	const key = args.key ?? keys.pick(p.maxKeyAccidentals, rng);
 
-	const melody = generateMelody({
+	const { melody, phrases } = generatePhrased({
 		seed: args.seed,
-		key: args.key,
+		key,
 		bars,
 		lowestMidi: args.lowestMidi,
 		highestMidi: args.highestMidi,
 		stepBias,
 		maxLeap: p.maxLeapScaleSteps,
+		scheme: schemeForGrade(args.grade),
+		phraseBars: PHRASE_BARS,
+		meter,
+		centerMidi: args.centerMidi,
 	});
-	return { ...melody, tempo, timeSignature };
+	const rested = preventFullBarRests(
+		insertRests(melody.notes, p.restProbability, rng),
+		melody.barUnits,
+	);
+	const scalePitchClasses = new Set(
+		scale.degrees(key).map((d) => d.pitchClass),
+	);
+	const accented = raiseLeadingTones(
+		insertAccidentals(
+			rested,
+			p.accidentals,
+			{
+				scalePitchClasses,
+				lowestMidi: args.lowestMidi,
+				highestMidi: args.highestMidi,
+			},
+			rng,
+		),
+		key,
+	);
+	// Note count per phrase = its span's durations length, so cumulative sums give
+	// the phrase-start indices into the (length-preserved) note stream.
+	let acc = 0;
+	const phraseStarts = phrases.map((ph) => {
+		const s = acc;
+		acc += ph.durations.length;
+		return s;
+	});
+	const withDynamics = applyDynamics(
+		accented,
+		phraseStarts,
+		p.dynamics,
+		melody.barUnits,
+		rng,
+	);
+	const notes = applyArticulations(withDynamics, p.articulations, rng);
+	return { ...melody, notes, tempo, timeSignature };
 }

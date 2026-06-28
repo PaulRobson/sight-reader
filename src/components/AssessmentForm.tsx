@@ -6,12 +6,16 @@ import {
 	type Dimension,
 	type Rating,
 } from "../lib/assessment.ts";
+import { RatingScale } from "./RatingScale.tsx";
 
-const RATINGS: Rating[] = [1, 2, 3, 4, 5];
+type Props = {
+	pieceId: string;
+	grade: number;
+	keyName: string;
+	onSubmit: (log: AttemptLog) => void;
+};
 
-type Props = { pieceId: string; onSubmit: (log: AttemptLog) => void };
-
-export function AssessmentForm({ pieceId, onSubmit }: Props) {
+export function AssessmentForm({ pieceId, grade, keyName, onSubmit }: Props) {
 	const [draft, setDraft] = useState<AssessmentDraft>(assessment.emptyDraft);
 
 	function rate(key: Dimension, value: Rating) {
@@ -19,27 +23,38 @@ export function AssessmentForm({ pieceId, onSubmit }: Props) {
 	}
 
 	function submit() {
-		const log = assessment.buildAttemptLog(draft, pieceId, Date.now());
+		const log = assessment.buildAttemptLog(draft, pieceId, grade, Date.now());
 		if (log) onSubmit(log);
 	}
 
 	return (
 		<section className="assessment" aria-label="self-assessment">
+			<h2 className="assessment-heading">Self-assessment</h2>
+			{keyName ? (
+				<header className="assessment-key">
+					<span className="assessment-key-name">
+						<span>Key</span>
+						<strong>{keyName}</strong>
+					</span>
+					<label className="key-correct">
+						<input
+							type="checkbox"
+							checked={draft.correctKey}
+							onChange={(e) =>
+								setDraft((d) => ({ ...d, correctKey: e.target.checked }))
+							}
+						/>
+						Correct
+					</label>
+				</header>
+			) : null}
 			{assessment.DIMENSIONS.map((d) => (
-				<fieldset key={d.key} className="assessment-dimension">
-					<legend>{d.label}</legend>
-					{RATINGS.map((value) => (
-						<label key={value}>
-							<input
-								type="radio"
-								name={d.key}
-								checked={draft.ratings[d.key] === value}
-								onChange={() => rate(d.key, value)}
-							/>
-							{value}
-						</label>
-					))}
-				</fieldset>
+				<RatingScale
+					key={d.key}
+					dimension={d}
+					value={draft.ratings[d.key]}
+					onRate={(value) => rate(d.key, value)}
+				/>
 			))}
 			<label className="assessment-notes">
 				Notes

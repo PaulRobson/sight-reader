@@ -1,60 +1,22 @@
-import { type ScaleNote, scale } from "./scale.ts";
+import {
+	clampIndex,
+	type GeneratorOptions,
+	nearest,
+	type Pitch,
+	pitchSpace,
+} from "./pitchSpace.ts";
 
-export type GeneratorOptions = {
-	seed: number;
-	key: string; // written tonic, e.g. "C"
-	bars: number;
-	lowestMidi: number; // range clamp (inclusive)
-	highestMidi: number;
-	stepBias: number; // 0..1 probability of a stepwise move
-	maxLeap: number; // largest leap in scale steps (a 3rd = 2)
-};
+export type { GeneratorOptions, Pitch };
+// Re-exported so the pitch-space toolkit stays reachable via this module.
+export { clampIndex, nearest, pitchSpace };
 
-export type Pitch = {
-	midi: number;
-	letter: string;
-	accidental: number;
-	octave: number;
-};
-
-// All diatonic pitches of the key within range, ascending by MIDI.
-function buildPitches(key: string, lo: number, hi: number): Pitch[] {
-	const degrees = scale.major(key);
-	const pitches: Pitch[] = [];
-	for (let octave = 0; octave <= 9; octave++) {
-		for (const d of degrees) {
-			const midi = scale.toMidi(d, octave);
-			if (midi >= lo && midi <= hi) {
-				pitches.push({
-					midi,
-					letter: d.letter,
-					accidental: d.accidental,
-					octave,
-				});
-			}
-		}
-	}
-	return pitches.sort((a, b) => a.midi - b.midi);
+// A bounded signed move in scale steps: a step (±1) with probability stepBias,
+// else a leap up to maxLeap. Used both inside the walk and for phrase joins.
+export function stepDelta(opts: GeneratorOptions, rng: () => number): number {
+	const isStep = rng() < opts.stepBias;
+	const magnitude = isStep ? 1 : 2 + Math.floor(rng() * (opts.maxLeap - 1));
+	return (rng() < 0.5 ? -1 : 1) * magnitude;
 }
-
-function tonicIndices(pitches: Pitch[], tonic: ScaleNote): number[] {
-	const out: number[] = [];
-	pitches.forEach((p, i) => {
-		if (p.letter === tonic.letter && p.accidental === tonic.accidental)
-			out.push(i);
-	});
-	return out;
-}
-
-function nearest(indices: number[], target: number): number {
-	return indices.reduce(
-		(best, i) => (Math.abs(i - target) < Math.abs(best - target) ? i : best),
-		indices[0],
-	);
-}
-
-const clampIndex = (v: number, len: number) =>
-	Math.max(0, Math.min(len - 1, v));
 
 function freeMove(
 	prev: number,
@@ -62,11 +24,9 @@ function freeMove(
 	len: number,
 	rng: () => number,
 ) {
-	const isStep = rng() < opts.stepBias;
-	const magnitude = isStep ? 1 : 2 + Math.floor(rng() * (opts.maxLeap - 1));
-	const dir = rng() < 0.5 ? -1 : 1;
-	const cand = prev + magnitude * dir;
-	return cand < 0 || cand >= len ? prev - magnitude * dir : cand; // reflect inward
+	const delta = stepDelta(opts, rng);
+	const cand = prev + delta;
+	return cand < 0 || cand >= len ? prev - delta : cand; // reflect inward
 }
 
 function nextIndex(
@@ -83,7 +43,7 @@ function nextIndex(
 	return clampIndex(freeMove(prev, opts, len, rng), len);
 }
 
-function buildIndices(
+export function buildIndices(
 	count: number,
 	start: number,
 	opts: GeneratorOptions,
@@ -98,8 +58,30 @@ function buildIndices(
 	return indices;
 }
 
+// Pull each note that follows a sixteenth-or-shorter note inward until the leap
+// into it is at most `maxSemitones`, so fast passages stay playable. `pitches` is
+// ascending by MIDI, so stepping the index toward the previous note shrinks the
+// interval. `protect` positions are never moved (e.g. cadence landings). Mutates.
+export function limitFastLeaps(
+	indices: number[],
+	durations: number[],
+	pitches: Pitch[],
+	maxSemitones: number,
+	protect?: Set<number>,
+): void {
+	for (let i = 1; i < indices.length; i++) {
+		if (durations[i - 1] > 1 || protect?.has(i)) continue;
+		const prevMidi = pitches[indices[i - 1]].midi;
+		while (
+			indices[i] !== indices[i - 1] &&
+			Math.abs(pitches[indices[i]].midi - prevMidi) > maxSemitones
+		)
+			indices[i] += indices[i] > indices[i - 1] ? -1 : 1;
+	}
+}
+
 // Last note = tonic, approached by step (leading tone or supertonic).
-function finalizeCadence(indices: number[], tonics: number[]): void {
+export function finalizeCadence(indices: number[], tonics: number[]): void {
 	const n = indices.length;
 	if (n >= 3) {
 		const finalTonic = nearest(tonics, indices[n - 2]);
@@ -110,17 +92,15 @@ function finalizeCadence(indices: number[], tonics: number[]): void {
 	}
 }
 
-// Stepwise-biased diatonic walk: first note near mid-range tonic, leaps capped
-// and resolved, last note a tonic approached by step. Consumes rng in order.
+// Stepwise-biased diatonic walk: first note near the tessitura anchor, leaps
+// capped and resolved, last note a tonic approached by step. Consumes rng in
+// order.
 export function pitchWalk(
 	opts: GeneratorOptions,
 	count: number,
 	rng: () => number,
 ): Pitch[] {
-	const degrees = scale.major(opts.key);
-	const pitches = buildPitches(opts.key, opts.lowestMidi, opts.highestMidi);
-	const tonics = tonicIndices(pitches, degrees[0]);
-	const start = nearest(tonics, Math.floor(pitches.length / 2));
+	const { pitches, tonics, start } = pitchSpace(opts);
 	const indices = buildIndices(count, start, opts, pitches.length, rng);
 	finalizeCadence(indices, tonics);
 	return indices.map((i) => pitches[i]);

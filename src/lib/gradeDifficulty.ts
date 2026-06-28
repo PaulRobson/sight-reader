@@ -1,6 +1,6 @@
 export type Grade = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
-type AccidentalBreadth =
+export type AccidentalBreadth =
 	| "none"
 	| "rare"
 	| "passing"
@@ -12,8 +12,9 @@ type AccidentalBreadth =
 
 // §5 difficulty table, machine-usable. One place to tune.
 // maxLeapScaleSteps follows generateMelody's unit (a 3rd = 2).
-// shortestNoteSixteenths is the smallest rhythmic grid unit (quarter = 4).
-type GradeParams = {
+// shortestNoteSixteenths is the smallest rhythmic grid unit (quarter = 4,
+// sixteenth = 1, thirty-second = 0.5).
+export type GradeParams = {
 	bars: [number, number]; // inclusive min/max
 	timeSignatures: string[];
 	maxKeyAccidentals: number; // sharps-or-flats in the written key
@@ -23,7 +24,14 @@ type GradeParams = {
 	dynamics: string[];
 	articulations: string[];
 	accidentals: AccidentalBreadth;
-	restProbability: number; // 0..1
+	restProbability: number; // 0..1; flat 0.1 across grades — rests aren't a difficulty axis
+	// Multiplies the draw weight of cells containing a 32nd: < 1 makes them rarer,
+	// > 1 more frequent. Omitted = 1 (drawn like any other cell).
+	fineNoteWeight?: number;
+	// Multiplies the draw weight of coarse cells (no note shorter than a quarter):
+	// < 1 makes whole/half/quarter-only bars rarer, so a grade reads more uniformly
+	// busy. Omitted = 1.
+	coarseNoteWeight?: number;
 };
 
 export const gradeDifficulty: Record<Grade, GradeParams> = {
@@ -49,7 +57,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["p", "mp", "mf", "f"],
 		articulations: ["slur"],
 		accidentals: "rare",
-		restProbability: 0.15,
+		restProbability: 0.1,
 	},
 	3: {
 		bars: [8, 12],
@@ -61,7 +69,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["p", "mp", "mf", "f", "cresc", "dim"],
 		articulations: ["slur", "staccato"],
 		accidentals: "passing",
-		restProbability: 0.2,
+		restProbability: 0.1,
 	},
 	4: {
 		bars: [12, 12],
@@ -73,7 +81,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["p", "mp", "mf", "f", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "occasional",
-		restProbability: 0.25,
+		restProbability: 0.1,
 	},
 	5: {
 		bars: [12, 16],
@@ -85,7 +93,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "regular",
-		restProbability: 0.3,
+		restProbability: 0.1,
 	},
 	6: {
 		bars: [16, 16],
@@ -101,13 +109,15 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 			"5/4",
 		],
 		maxKeyAccidentals: 6,
-		shortestNoteSixteenths: 1,
+		shortestNoteSixteenths: 0.5,
 		maxLeapScaleSteps: 8,
 		tempoBpm: [100, 132],
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "chromatic",
-		restProbability: 0.35,
+		restProbability: 0.1,
+		fineNoteWeight: 0.1,
+		coarseNoteWeight: 0.7,
 	},
 	7: {
 		bars: [16, 20],
@@ -124,13 +134,15 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 			"7/8",
 		],
 		maxKeyAccidentals: 7,
-		shortestNoteSixteenths: 1,
+		shortestNoteSixteenths: 0.5,
 		maxLeapScaleSteps: 9,
 		tempoBpm: [100, 144],
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "frequent",
-		restProbability: 0.4,
+		restProbability: 0.1,
+		fineNoteWeight: 0.2,
+		coarseNoteWeight: 0.5,
 	},
 	8: {
 		bars: [20, 24],
@@ -148,12 +160,14 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 			"5/8",
 		],
 		maxKeyAccidentals: 7,
-		shortestNoteSixteenths: 1,
+		shortestNoteSixteenths: 0.5,
 		maxLeapScaleSteps: 10,
 		tempoBpm: [100, 144],
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "modulation",
-		restProbability: 0.4,
+		restProbability: 0.1,
+		fineNoteWeight: 0.35,
+		coarseNoteWeight: 0.3,
 	},
 };

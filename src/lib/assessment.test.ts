@@ -9,6 +9,7 @@ const full: AssessmentDraft = {
 		dynamicsArticulation: 2,
 		overallConfidence: 4,
 	},
+	correctKey: true,
 	notes: "",
 };
 
@@ -31,7 +32,9 @@ describe("assessment.isComplete", () => {
 
 	it("is false when any dimension is unrated", () => {
 		const partial = { ...full.ratings, dynamicsArticulation: undefined };
-		expect(assessment.isComplete({ ratings: partial, notes: "" })).toBe(false);
+		expect(
+			assessment.isComplete({ ratings: partial, correctKey: false, notes: "" }),
+		).toBe(false);
 	});
 
 	it("is true once all five are rated", () => {
@@ -42,19 +45,21 @@ describe("assessment.isComplete", () => {
 describe("assessment.buildAttemptLog", () => {
 	it("returns null when incomplete", () => {
 		expect(
-			assessment.buildAttemptLog(assessment.emptyDraft, "p1", 100),
+			assessment.buildAttemptLog(assessment.emptyDraft, "p1", 1, 100),
 		).toBeNull();
 	});
 
-	it("produces a valid AttemptLog with pieceId and ratedAt", () => {
-		expect(assessment.buildAttemptLog(full, "p1", 1700)).toEqual({
+	it("produces a valid AttemptLog with pieceId, grade and ratedAt", () => {
+		expect(assessment.buildAttemptLog(full, "p1", 3, 1700)).toEqual({
 			pieceId: "p1",
+			grade: 3,
 			ratedAt: 1700,
 			pitch: 4,
 			rhythm: 3,
 			keptGoing: 5,
 			dynamicsArticulation: 2,
 			overallConfidence: 4,
+			correctKey: true,
 		});
 	});
 
@@ -63,12 +68,18 @@ describe("assessment.buildAttemptLog", () => {
 			{ ...full, notes: "  shaky bar 3 " },
 			"p1",
 			1,
+			1,
 		);
 		expect(log?.notes).toBe("shaky bar 3");
 	});
 
 	it("omits notes when blank or whitespace", () => {
-		const log = assessment.buildAttemptLog({ ...full, notes: "   " }, "p1", 1);
+		const log = assessment.buildAttemptLog(
+			{ ...full, notes: "   " },
+			"p1",
+			1,
+			1,
+		);
 		expect(log && "notes" in log).toBe(false);
 	});
 });

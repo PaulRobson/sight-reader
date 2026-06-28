@@ -11,15 +11,19 @@ export type ViewEvent =
 	| { type: "closeHistory" }; // history -> settings
 
 const transitions: Record<View, Partial<Record<ViewEvent["type"], View>>> = {
-	settings: { start: "prep", openHistory: "history" },
+	settings: {},
 	prep: { countdownDone: "playNow" },
 	playNow: { finishAttempt: "assess" },
-	assess: { saveAttempt: "settings", openHistory: "history" },
+	assess: { saveAttempt: "settings" },
 	history: { closeHistory: "settings" },
 };
 
-// Invalid event for the current view is a no-op (returns the same view).
+// "Let's go" and "History" are universal: from any view, start begins a fresh
+// prep countdown and openHistory shows the history panel. Other events follow the
+// per-view map; an invalid event is a no-op.
 export function viewReducer(view: View, event: ViewEvent): View {
+	if (event.type === "start") return "prep";
+	if (event.type === "openHistory") return "history";
 	return transitions[view][event.type] ?? view;
 }
 

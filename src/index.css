@@ -60,8 +60,25 @@ main {
 	min-height: 100dvh;
 	max-width: 64rem;
 	margin: 0 auto;
-	padding: 1.5rem;
+	/* Honour the notch / home indicator so nothing sits under them (§9). */
+	padding: max(1.5rem, env(safe-area-inset-top))
+		max(1.5rem, env(safe-area-inset-right))
+		max(1.5rem, env(safe-area-inset-bottom))
+		max(1.5rem, env(safe-area-inset-left));
 	gap: 1.5rem;
+}
+
+.app-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.app-header-actions {
+	display: flex;
+	gap: 0.5rem;
 }
 
 h1 {
@@ -103,7 +120,28 @@ h1 {
 		inset -2px -2px 4px var(--sh-light);
 }
 
-/* Buttons — flat: outlined secondary, solid primary */
+.start-prompt {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1.5rem;
+	background: var(--paper);
+	border-radius: 10px;
+	padding: 3rem 1.5rem;
+	text-align: center;
+	box-shadow:
+		inset 2px 2px 4px var(--sh-dark),
+		inset -2px -2px 4px var(--sh-light);
+}
+
+.start-prompt p {
+	margin: 0;
+	font-size: 1.25rem;
+	color: var(--muted);
+}
+
+/* Buttons — flat: outlined secondary, solid primary. min 44px touch target;
+   touch-action/user-select stop double-tap zoom + stray selection on tap (§9). */
 button {
 	font: inherit;
 	font-weight: 600;
@@ -113,7 +151,11 @@ button {
 	border-radius: var(--r-control);
 	padding: 0.7rem 1.25rem;
 	min-height: 44px;
+	min-width: 44px;
 	cursor: pointer;
+	touch-action: manipulation;
+	user-select: none;
+	-webkit-user-select: none;
 	transition:
 		background 0.2s ease-out,
 		border-color 0.2s ease-out,
@@ -156,6 +198,30 @@ button:focus-visible {
 .play {
 	align-self: flex-start;
 	font-size: 1.1rem;
+}
+
+.finish-attempt {
+	align-self: center;
+	font-size: 1.1rem;
+}
+
+/* Tappable labels: single-tap, no double-tap zoom, no text selection (§9). */
+.rating-option,
+.key-correct,
+.settings-panel .toggle,
+.mode-toggle label,
+.clef-selector label {
+	touch-action: manipulation;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+/* Glance-able signals are read, never selected. */
+.play-now-banner,
+.countdown-value,
+.view-label {
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 nav {
@@ -220,6 +286,50 @@ input[type="checkbox"] {
 	border-radius: 16px;
 }
 
+.grade-summary {
+	grid-column: 1 / -1;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 1.25rem 1.4rem;
+	background: var(--paper);
+	border-radius: var(--r-inner);
+	box-shadow: var(--inset-sm);
+}
+
+.grade-summary h3 {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: 0.95rem;
+	color: var(--text);
+}
+
+.grade-summary dl {
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+}
+
+.grade-summary dl div {
+	display: flex;
+	gap: 1rem;
+}
+
+.grade-summary dt {
+	flex: 0 0 9rem;
+	font-weight: 600;
+	font-size: 0.85rem;
+	color: var(--muted);
+}
+
+.grade-summary dd {
+	flex: 1;
+	margin: 0;
+	font-size: 0.85rem;
+	color: var(--text);
+}
+
 .settings-panel label,
 .assessment-notes {
 	display: flex;
@@ -272,30 +382,109 @@ legend {
 	gap: 0.5rem;
 }
 
+.assessment-heading {
+	margin: 0;
+	font-size: 1.4rem;
+	color: var(--text);
+}
+
+.assessment-key {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 1.25rem;
+	flex-wrap: wrap;
+}
+
+.assessment-key-name {
+	display: flex;
+	align-items: baseline;
+	gap: 0.6rem;
+}
+
+.assessment-key-name span {
+	font-size: 0.85rem;
+	color: var(--muted);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.assessment-key-name strong {
+	font-size: 1.5rem;
+	color: var(--text);
+}
+
+.key-correct {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	color: var(--text);
+	cursor: pointer;
+}
+
+.key-correct input {
+	width: 1.25rem;
+	height: 1.25rem;
+	accent-color: var(--accent);
+}
+
+.rating-scale {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.scale-end {
+	color: var(--muted);
+	font-size: 0.85rem;
+	font-weight: 500;
+	white-space: nowrap;
+}
+
+.rating-option {
+	justify-content: center;
+	min-width: 2.75rem;
+	min-height: 2.75rem;
+	cursor: pointer;
+}
+
+.rating-option input {
+	width: 1.25rem;
+	height: 1.25rem;
+	accent-color: var(--accent);
+}
+
+.history {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.history-heading {
+	margin: 0.5rem 0 0;
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 0.8rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+.history-heading:first-child {
+	margin-top: 0;
+}
+
 .history-list,
 .history-averages {
 	margin: 0;
 	padding: 0;
 }
 
-.history-list {
-	list-style: none;
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-}
-
-.history-list li {
-	padding: 0.75rem 1rem;
-	border-radius: var(--r-inner);
-	box-shadow: var(--inset-sm);
-}
-
 .history-averages {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
 	gap: 1rem;
-	margin-top: 1.25rem;
 }
 
 .history-averages dt {
@@ -309,6 +498,89 @@ legend {
 	font-weight: 700;
 	font-size: 1.5rem;
 	color: var(--accent);
+}
+
+.history-list {
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.history-item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 1rem 1.1rem;
+	border-radius: var(--r-inner);
+	box-shadow: var(--inset-sm);
+}
+
+.history-item-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+
+.history-show-piece {
+	align-self: flex-start;
+}
+
+.history-item-head time {
+	font-family: var(--font-display);
+	font-weight: 600;
+	color: var(--text);
+}
+
+.grade-badge {
+	flex: none;
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--paper);
+	background: var(--accent);
+	padding: 0.25rem 0.65rem;
+	border-radius: 999px;
+}
+
+.history-ratings {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
+	gap: 0.5rem;
+}
+
+.history-rating {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.15rem;
+	padding: 0.5rem 0.4rem;
+	border-radius: var(--r-inner);
+	background: var(--surface);
+	box-shadow: var(--extrude-sm);
+}
+
+.history-rating-value {
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 1.3rem;
+	line-height: 1;
+	color: var(--ink);
+}
+
+.history-rating-label {
+	font-size: 0.7rem;
+	text-align: center;
+	color: var(--muted);
+}
+
+.history-notes {
+	margin: 0;
+	font-size: 0.9rem;
+	font-style: italic;
+	color: var(--text);
 }
 
 /* Glance-able signals — high contrast, no soft shadow */
@@ -368,5 +640,36 @@ legend {
 	textarea,
 	input[type="number"] {
 		transition: none;
+	}
+}
+
+/* Phone: compact single column, systems scrolling vertically (§9). Tablet touch
+   targets are untouched — only spacing tightens. */
+@media (max-width: 540px) {
+	main {
+		gap: 1rem;
+		padding: max(0.85rem, env(safe-area-inset-top))
+			max(0.85rem, env(safe-area-inset-right))
+			max(0.85rem, env(safe-area-inset-bottom))
+			max(0.85rem, env(safe-area-inset-left));
+	}
+
+	.score {
+		padding: 0.85rem 0.9rem;
+	}
+
+	.settings-panel,
+	.assessment,
+	.history {
+		padding: 1.25rem;
+	}
+}
+
+/* Landscape tablet/desktop (the music-stand orientation): the score uses more of
+   the width so it renders larger and dominates (abcjs scales the SVG to the
+   container width); controls stay a slim bottom bar (§9). */
+@media (orientation: landscape) and (min-width: 768px) {
+	main {
+		max-width: 80rem;
 	}
 }

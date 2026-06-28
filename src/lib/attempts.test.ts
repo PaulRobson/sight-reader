@@ -26,6 +26,7 @@ function mockStore(): Storage {
 function log(pieceId: string, ratedAt: number): AttemptLog {
 	return {
 		pieceId,
+		grade: 1,
 		ratedAt,
 		pitch: 3,
 		rhythm: 3,

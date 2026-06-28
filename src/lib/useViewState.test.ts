@@ -9,16 +9,23 @@ describe("viewReducer", () => {
 		expect(viewReducer("assess", { type: "saveAttempt" })).toBe("settings");
 	});
 
-	it("opens and closes history", () => {
-		expect(viewReducer("settings", { type: "openHistory" })).toBe("history");
-		expect(viewReducer("assess", { type: "openHistory" })).toBe("history");
+	it("opens history from any view and closes back to settings", () => {
+		for (const v of ["settings", "prep", "playNow", "assess"] as View[])
+			expect(viewReducer(v, { type: "openHistory" })).toBe("history");
 		expect(viewReducer("history", { type: "closeHistory" })).toBe("settings");
 	});
 
 	it("ignores events invalid for the current view (no-op)", () => {
-		expect(viewReducer("playNow", { type: "start" })).toBe("playNow");
+		expect(viewReducer("playNow", { type: "countdownDone" })).toBe("playNow");
 		expect(viewReducer("settings", { type: "finishAttempt" })).toBe("settings");
-		expect(viewReducer("history", { type: "start" })).toBe("history");
+		expect(viewReducer("history", { type: "countdownDone" })).toBe("history");
+	});
+
+	it("restarts to prep from any view on start", () => {
+		expect(viewReducer("playNow", { type: "start" })).toBe("prep");
+		expect(viewReducer("assess", { type: "start" })).toBe("prep");
+		expect(viewReducer("history", { type: "start" })).toBe("prep");
+		expect(viewReducer("prep", { type: "start" })).toBe("prep");
 	});
 
 	it("reduces a full session sequence", () => {
