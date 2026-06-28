@@ -139,7 +139,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 ### Slice 3 — Settings (replace the hardcoding)
 - [x] `[test]` `InstrumentDef[]` table (§6): Trombone, Cello, Piano, Flute, Violin, Clarinet in B♭, Trumpet in B♭, Alto Sax (E♭), Guitar. **Done:** ranges parse as valid SPN, offsets present, clefs non-empty; tested.
 - [x] Instrument picker wired to settings + persistence. **Done:** selection updates and persists.
-- [x] Clef selector constrained to `instrument.clefs`; piano shows the grand staff.
+- [x] Clef selector constrained to `instrument.clefs`; piano shows the grand staff. **Updated:** piano now renders on a **single staff** with the chosen clef (its clef selector offers treble/bass), not a grand staff — splitting a single melodic line at middle C left one staff mostly empty, which didn't read as real piano writing. The grand-staff path (`splitGrandStaff`, `isGrandStaff`, `toAbc`'s `grandStaff` option, `GRAND_STAFF_CENTER`) was removed; tessitura now centres on the chosen clef's staff like every other instrument. The Slice 6 notes below still mention `splitGrandStaff` (historical — that code is gone).
 - [x] Grade select 1–8.
 - [x] Mode toggle: Melodic / Rhythm-only.
 - [x] Countdown duration input (default 60s, 0 = skip).

@@ -1,12 +1,7 @@
 import { generateForGrade } from "./generateForGrade.ts";
 import { generateRhythm, RHYTHM_GM_PROGRAM } from "./generateRhythm.ts";
 import type { Grade } from "./gradeDifficulty.ts";
-import {
-	type Clef,
-	findInstrument,
-	isGrandStaff,
-	spnToMidi,
-} from "./instruments.ts";
+import { type Clef, findInstrument, spnToMidi } from "./instruments.ts";
 import { toAbc } from "./toAbc.ts";
 import type { Settings } from "./useSettings.ts";
 
@@ -21,7 +16,6 @@ const STAFF_CENTER: Record<Clef, number> = {
 	alto: 60, // C4
 	tenor: 57, // A3
 };
-const GRAND_STAFF_CENTER = 60; // middle C straddles the two staves
 
 // A comfortable playing span (semitones either side of the tessitura centre),
 // widening with grade. Kept well inside the instrument's absolute range so
@@ -41,8 +35,8 @@ export function comfortableRange(
 }
 
 // The comfortable note band (and its tessitura centre) the current settings
-// generate within: the grade-scaled span around the staff centre, clamped to the
-// instrument's range. Piano (grand staff) centres on middle C.
+// generate within: the grade-scaled span around the chosen clef's staff centre,
+// clamped to the instrument's range.
 export function rangeForSettings(settings: Settings): {
 	lowestMidi: number;
 	highestMidi: number;
@@ -50,9 +44,7 @@ export function rangeForSettings(settings: Settings): {
 } {
 	const instrument = findInstrument(settings.instrumentId);
 	const grade = asGrade(settings.grade);
-	const center = isGrandStaff(instrument)
-		? GRAND_STAFF_CENTER
-		: STAFF_CENTER[settings.clef];
+	const center = STAFF_CENTER[settings.clef];
 	const range = comfortableRange(
 		center,
 		grade,
@@ -80,7 +72,6 @@ export function pieceForSettings(settings: Settings, seed: number): string {
 			program: RHYTHM_GM_PROGRAM,
 		});
 	}
-	const grandStaff = isGrandStaff(instrument);
 	const range = rangeForSettings(settings);
 	const melody = generateForGrade({
 		grade,
@@ -93,7 +84,6 @@ export function pieceForSettings(settings: Settings, seed: number): string {
 		tempo: melody.tempo,
 		clef: settings.clef,
 		meter: melody.timeSignature,
-		grandStaff,
 		program: instrument.gmProgram,
 	});
 }

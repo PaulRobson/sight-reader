@@ -53,14 +53,15 @@ describe("pieceForSettings", () => {
 		);
 	});
 
-	it("renders piano as a grand staff", () => {
-		const abc = pieceForSettings(
-			{ ...base, instrumentId: "piano", grade: 3 },
-			1,
-		);
-		expect(abc).toContain("%%score {1 2}");
-		expect(abc).toContain("V:1 clef=treble");
-		expect(abc).toContain("V:2 clef=bass");
+	it("renders piano on a single staff with the chosen clef", () => {
+		for (const clef of ["treble", "bass"] as const) {
+			const abc = pieceForSettings(
+				{ ...base, instrumentId: "piano", clef, grade: 3 },
+				1,
+			);
+			expect(abc).not.toContain("%%score"); // single staff, not a grand staff
+			expect(abc).toContain(`clef=${clef}`); // the chosen clef (key is grade-derived)
+		}
 	});
 
 	it("emits the instrument's GM program for the synth timbre", () => {

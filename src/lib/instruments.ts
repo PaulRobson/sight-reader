@@ -156,10 +156,3 @@ export function findInstrument(id: string): InstrumentDef {
 export function constrainClef(instrument: InstrumentDef, clef: Clef): Clef {
 	return instrument.clefs.includes(clef) ? clef : instrument.defaultClef;
 }
-
-// Treble + bass together = grand staff (piano), shown as one staff pair.
-export function isGrandStaff(instrument: InstrumentDef): boolean {
-	return (
-		instrument.clefs.includes("treble") && instrument.clefs.includes("bass")
-	);
-}
