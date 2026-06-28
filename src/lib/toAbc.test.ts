@@ -283,6 +283,13 @@ describe("toAbc", () => {
 		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
 	});
 
+	it("renders a single-line percussion staff for rhythm-only mode", () => {
+		const abc = toAbc(generateMelody(grade1), { percussion: true });
+		expect(abc).toContain("K:C clef=perc stafflines=1");
+		expect(abc).not.toContain("%%score");
+		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
+	});
+
 	it("emits z tokens for rested slots and still parses cleanly", () => {
 		const melody = generateMelody(grade1);
 		melody.notes[1] = { ...melody.notes[1], rest: true };

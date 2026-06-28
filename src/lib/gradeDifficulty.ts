@@ -13,7 +13,7 @@ export type AccidentalBreadth =
 // §5 difficulty table, machine-usable. One place to tune.
 // maxLeapScaleSteps follows generateMelody's unit (a 3rd = 2).
 // shortestNoteSixteenths is the smallest rhythmic grid unit (quarter = 4).
-type GradeParams = {
+export type GradeParams = {
 	bars: [number, number]; // inclusive min/max
 	timeSignatures: string[];
 	maxKeyAccidentals: number; // sharps-or-flats in the written key

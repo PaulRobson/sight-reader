@@ -1,4 +1,5 @@
 import { generateForGrade } from "./generateForGrade.ts";
+import { generateRhythm } from "./generateRhythm.ts";
 import type { Grade } from "./gradeDifficulty.ts";
 import {
 	type Clef,
@@ -69,8 +70,17 @@ export function rangeForSettings(settings: Settings): {
 // %%MIDI program header the synth reads from the parsed tune.
 export function pieceForSettings(settings: Settings, seed: number): string {
 	const instrument = findInstrument(settings.instrumentId);
-	const grandStaff = isGrandStaff(instrument);
 	const grade = asGrade(settings.grade);
+	if (settings.mode === "rhythm-only") {
+		const r = generateRhythm({ grade, seed });
+		return toAbc(r, {
+			tempo: r.tempo,
+			meter: r.timeSignature,
+			percussion: true,
+			program: instrument.gmProgram,
+		});
+	}
+	const grandStaff = isGrandStaff(instrument);
 	const range = rangeForSettings(settings);
 	const melody = generateForGrade({
 		grade,

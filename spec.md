@@ -180,7 +180,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] `[manual]` Dynamics and articulation render on the score and audibly affect playback where abcjs supports it. **Verified.**
 
 ### Slice 7 — Rhythm-only mode (§8)
-- [ ] `[test]` Rhythm-only generation: reuse the rhythm cells, single fixed pitch, single-line presentation.
+- [x] `[test]` Rhythm-only generation: reuse the rhythm cells, single fixed pitch, single-line presentation. **Done:** `generateRhythm` reuses the grade's rhythm-cell draw (the bars/tempo/time-sig/restricted-meter step is now the shared `gradeRhythmPlan`, also feeding `generateForGrade` so its output is unchanged), skips pitch assignment, and fixes every slot to B4 — the pitch that sits on the single percussion-clef line (abcjs perc pitch 6). Key is C (no signature) with no dynamics/articulation/accidentals (melodic concerns). `toAbc` gains a `percussion` option emitting `K:C clef=perc stafflines=1` (single line, never a grand staff); `pieceForSettings` routes `mode === "rhythm-only"` through it for any instrument. Tested: fixed-pitch/no-rests invariant, grade-scaled rhythm vocabulary (quarters-only g1, sixteenths reachable g5+), bar/tempo/meter bounds, determinism, and warning-free perc-staff serialization across grades. Reference timbre stays the instrument's GM program until the next task swaps it for a woodblock.
 - [ ] Rhythm-only playback uses a woodblock/percussion timbre.
 
 **Manual checkpoints (end of slice):**

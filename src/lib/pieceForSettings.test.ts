@@ -72,6 +72,23 @@ describe("pieceForSettings", () => {
 		}
 	});
 
+	it("renders rhythm-only mode as a single-line percussion staff", () => {
+		for (const instrumentId of ["piano", "flute", "guitar"]) {
+			for (let seed = 1; seed <= 3; seed++) {
+				const abc = pieceForSettings(
+					{ ...base, instrumentId, mode: "rhythm-only", grade: 4 },
+					seed,
+				);
+				expect(abc).toContain("clef=perc stafflines=1");
+				expect(abc).not.toContain("%%score"); // never a grand staff, even for piano
+				expect(
+					abcjs.parseOnly(abc)[0].warnings,
+					`${instrumentId} s${seed}`,
+				).toBeUndefined();
+			}
+		}
+	});
+
 	it("reflects the chosen clef and a meter header", () => {
 		const abc = pieceForSettings(
 			{ ...base, instrumentId: "cello", clef: "bass", grade: 5 },

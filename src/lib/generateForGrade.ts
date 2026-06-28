@@ -3,12 +3,12 @@ import { applyDynamics } from "./applyDynamics.ts";
 import type { Melody } from "./generateMelody.ts";
 import { generatePhrased, schemeForGrade } from "./generatePhrased.ts";
 import { type Grade, gradeDifficulty } from "./gradeDifficulty.ts";
+import { gradeRhythmPlan } from "./gradeRhythmPlan.ts";
 import { insertAccidentals } from "./insertAccidentals.ts";
 import { insertRests, preventFullBarRests } from "./insertRests.ts";
 import { keys } from "./keys.ts";
 import { mulberry32 } from "./mulberry32.ts";
 import { raiseLeadingTones } from "./raiseLeadingTones.ts";
-import { rhythm } from "./rhythm.ts";
 import { scale } from "./scale.ts";
 
 // Phrases are 4 bars (§4); bar counts snap to a multiple so phrases tile evenly.
@@ -36,17 +36,9 @@ export function generateForGrade(
 ): Melody & { tempo: number; timeSignature: string } {
 	const p = gradeDifficulty[args.grade];
 	const rng = mulberry32(args.seed);
-	const bars = snapBars(
-		p.bars[0] + Math.floor(rng() * (p.bars[1] - p.bars[0] + 1)),
-	);
-	const tempo =
-		p.tempoBpm[0] + Math.floor(rng() * (p.tempoBpm[1] - p.tempoBpm[0] + 1));
-	const timeSignature =
-		p.timeSignatures[Math.floor(rng() * p.timeSignatures.length)];
-	const meter = rhythm.restrict(
-		rhythm.meters[timeSignature],
-		p.shortestNoteSixteenths,
-	);
+	const plan = gradeRhythmPlan(p, rng);
+	const bars = snapBars(plan.bars);
+	const { tempo, timeSignature, meter } = plan;
 	const stepBias = Math.max(0.5, 0.9 - (args.grade - 1) * 0.05);
 	const key = args.key ?? keys.pick(p.maxKeyAccidentals, rng);
 
