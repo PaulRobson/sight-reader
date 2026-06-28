@@ -1,6 +1,16 @@
 export type Rating = 1 | 2 | 3 | 4 | 5;
 
-// §2 data model. pieceId + grade + ratedAt come from the attempt context, not the form.
+// What each rating point means, so the scale reads as words not bare numbers.
+const RATING_LABELS: Record<Rating, string> = {
+	1: "Really bad",
+	2: "Bad",
+	3: "Okay",
+	4: "Good",
+	5: "Really good",
+};
+
+// §2 data model. pieceId + grade + ratedAt come from the attempt context, not the
+// form. correctKey records whether the student read/played the right key.
 export type AttemptLog = {
 	pieceId: string;
 	grade: number;
@@ -10,6 +20,7 @@ export type AttemptLog = {
 	keptGoing: Rating;
 	dynamicsArticulation: Rating;
 	overallConfidence: Rating;
+	correctKey?: boolean;
 	notes?: string;
 };
 
@@ -22,6 +33,7 @@ export type Dimension =
 
 export type AssessmentDraft = {
 	ratings: Partial<Record<Dimension, Rating>>;
+	correctKey: boolean;
 	notes: string;
 };
 
@@ -47,7 +59,8 @@ const DIMENSIONS: { key: Dimension; label: string; short: string }[] = [
 
 export const assessment = {
 	DIMENSIONS,
-	emptyDraft: { ratings: {}, notes: "" } as AssessmentDraft,
+	RATING_LABELS,
+	emptyDraft: { ratings: {}, correctKey: false, notes: "" } as AssessmentDraft,
 	isComplete(draft: AssessmentDraft): boolean {
 		return DIMENSIONS.every((d) => draft.ratings[d.key] !== undefined);
 	},
@@ -69,6 +82,7 @@ export const assessment = {
 			keptGoing: r.keptGoing,
 			dynamicsArticulation: r.dynamicsArticulation,
 			overallConfidence: r.overallConfidence,
+			correctKey: draft.correctKey,
 			...(notes ? { notes } : {}),
 		};
 	},

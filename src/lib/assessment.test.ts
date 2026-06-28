@@ -9,6 +9,7 @@ const full: AssessmentDraft = {
 		dynamicsArticulation: 2,
 		overallConfidence: 4,
 	},
+	correctKey: true,
 	notes: "",
 };
 
@@ -31,7 +32,9 @@ describe("assessment.isComplete", () => {
 
 	it("is false when any dimension is unrated", () => {
 		const partial = { ...full.ratings, dynamicsArticulation: undefined };
-		expect(assessment.isComplete({ ratings: partial, notes: "" })).toBe(false);
+		expect(
+			assessment.isComplete({ ratings: partial, correctKey: false, notes: "" }),
+		).toBe(false);
 	});
 
 	it("is true once all five are rated", () => {
@@ -56,6 +59,7 @@ describe("assessment.buildAttemptLog", () => {
 			keptGoing: 5,
 			dynamicsArticulation: 2,
 			overallConfidence: 4,
+			correctKey: true,
 		});
 	});
 

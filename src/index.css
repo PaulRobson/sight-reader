@@ -280,22 +280,50 @@ legend {
 	gap: 0.5rem;
 }
 
+.assessment-heading {
+	margin: 0;
+	font-size: 1.4rem;
+	color: var(--text);
+}
+
 .assessment-key {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+
+.assessment-key-name {
 	display: flex;
 	align-items: baseline;
 	gap: 0.6rem;
 }
 
-.assessment-key span {
+.assessment-key-name span {
 	font-size: 0.85rem;
 	color: var(--muted);
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
 }
 
-.assessment-key strong {
+.assessment-key-name strong {
 	font-size: 1.5rem;
 	color: var(--text);
+}
+
+.key-correct {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	color: var(--text);
+	cursor: pointer;
+}
+
+.key-correct input {
+	width: 1.25rem;
+	height: 1.25rem;
+	accent-color: var(--accent);
 }
 
 .rating-scale {
@@ -307,7 +335,9 @@ legend {
 
 .scale-end {
 	color: var(--muted);
+	font-size: 0.85rem;
 	font-weight: 500;
+	white-space: nowrap;
 }
 
 .rating-option {

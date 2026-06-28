@@ -6,8 +6,7 @@ import {
 	type Dimension,
 	type Rating,
 } from "../lib/assessment.ts";
-
-const RATINGS: Rating[] = [1, 2, 3, 4, 5];
+import { RatingScale } from "./RatingScale.tsx";
 
 type Props = {
 	pieceId: string;
@@ -30,35 +29,32 @@ export function AssessmentForm({ pieceId, grade, keyName, onSubmit }: Props) {
 
 	return (
 		<section className="assessment" aria-label="self-assessment">
+			<h2 className="assessment-heading">Self-assessment</h2>
 			{keyName ? (
 				<header className="assessment-key">
-					<span>Key</span>
-					<strong>{keyName}</strong>
+					<span className="assessment-key-name">
+						<span>Key</span>
+						<strong>{keyName}</strong>
+					</span>
+					<label className="key-correct">
+						<input
+							type="checkbox"
+							checked={draft.correctKey}
+							onChange={(e) =>
+								setDraft((d) => ({ ...d, correctKey: e.target.checked }))
+							}
+						/>
+						Correct
+					</label>
 				</header>
 			) : null}
 			{assessment.DIMENSIONS.map((d) => (
-				<fieldset key={d.key} className="assessment-dimension">
-					<legend>{d.label}</legend>
-					<div className="rating-scale">
-						<span className="scale-end" aria-hidden="true">
-							1
-						</span>
-						{RATINGS.map((value) => (
-							<label key={value} className="rating-option">
-								<input
-									type="radio"
-									name={d.key}
-									aria-label={`${value} out of 5`}
-									checked={draft.ratings[d.key] === value}
-									onChange={() => rate(d.key, value)}
-								/>
-							</label>
-						))}
-						<span className="scale-end" aria-hidden="true">
-							5
-						</span>
-					</div>
-				</fieldset>
+				<RatingScale
+					key={d.key}
+					dimension={d}
+					value={draft.ratings[d.key]}
+					onRate={(value) => rate(d.key, value)}
+				/>
 			))}
 			<label className="assessment-notes">
 				Notes
