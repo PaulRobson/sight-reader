@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AppHeader } from "./components/AppHeader.tsx";
 import { AssessmentForm } from "./components/AssessmentForm.tsx";
 import { Controls } from "./components/Controls.tsx";
 import { Countdown } from "./components/Countdown.tsx";
@@ -6,6 +7,7 @@ import { ExerciseView } from "./components/ExerciseView.tsx";
 import { HistoryView } from "./components/HistoryView.tsx";
 import { SettingsPanel } from "./components/SettingsPanel.tsx";
 import { findInstrument } from "./lib/instruments.ts";
+import { keyLabel } from "./lib/keyLabel.ts";
 import { transposition } from "./lib/transposition.ts";
 import { useAttemptMetronome } from "./lib/useAttemptMetronome.ts";
 import { useAttemptSession } from "./lib/useAttemptSession.ts";
@@ -48,17 +50,10 @@ export default function App() {
 
 	return (
 		<main>
-			<header className="app-header">
-				<h1>Sight-Reading Trainer</h1>
-				<button
-					type="button"
-					className={settingsOpen ? "primary" : undefined}
-					aria-expanded={settingsOpen}
-					onClick={() => setSettingsOpen((open) => !open)}
-				>
-					{settingsOpen ? "Save settings" : "Settings"}
-				</button>
-			</header>
+			<AppHeader
+				settingsOpen={settingsOpen}
+				onToggle={() => setSettingsOpen((open) => !open)}
+			/>
 			{settingsOpen ? (
 				<SettingsPanel settings={settings} update={update} />
 			) : (
@@ -88,6 +83,7 @@ export default function App() {
 						<AssessmentForm
 							pieceId={`piece-${seed}`}
 							grade={grade}
+							keyName={keyLabel(abc) ?? ""}
 							onSubmit={saveAttempt}
 						/>
 					) : null}
