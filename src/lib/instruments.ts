@@ -127,6 +127,27 @@ export function spnToMidi(spn: string): number {
 	return 12 * (Number(octave) + 1) + PITCH_CLASS[letter] + alter;
 }
 
+const SHARP_NAMES = [
+	"C",
+	"C♯",
+	"D",
+	"D♯",
+	"E",
+	"F",
+	"F♯",
+	"G",
+	"G♯",
+	"A",
+	"A♯",
+	"B",
+];
+
+// MIDI to a display note name (sharps), e.g. 60 -> "C4", 61 -> "C♯4".
+export function midiToNoteName(midi: number): string {
+	const octave = Math.floor(midi / 12) - 1;
+	return `${SHARP_NAMES[((midi % 12) + 12) % 12]}${octave}`;
+}
+
 export function findInstrument(id: string): InstrumentDef {
 	return instruments.find((i) => i.id === id) ?? instruments[0];
 }

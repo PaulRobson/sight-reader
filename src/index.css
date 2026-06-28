@@ -258,6 +258,50 @@ input[type="checkbox"] {
 	border-radius: 16px;
 }
 
+.grade-summary {
+	grid-column: 1 / -1;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 1.25rem 1.4rem;
+	background: var(--paper);
+	border-radius: var(--r-inner);
+	box-shadow: var(--inset-sm);
+}
+
+.grade-summary h3 {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: 0.95rem;
+	color: var(--text);
+}
+
+.grade-summary dl {
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+}
+
+.grade-summary dl div {
+	display: flex;
+	gap: 1rem;
+}
+
+.grade-summary dt {
+	flex: 0 0 9rem;
+	font-weight: 600;
+	font-size: 0.85rem;
+	color: var(--muted);
+}
+
+.grade-summary dd {
+	flex: 1;
+	margin: 0;
+	font-size: 0.85rem;
+	color: var(--text);
+}
+
 .settings-panel label,
 .assessment-notes {
 	display: flex;

@@ -3,6 +3,7 @@ import type { Settings } from "../lib/useSettings.ts";
 import { ClefSelector } from "./ClefSelector.tsx";
 import { CountdownInput } from "./CountdownInput.tsx";
 import { GradeSelect } from "./GradeSelect.tsx";
+import { GradeSummary } from "./GradeSummary.tsx";
 import { InstrumentPicker } from "./InstrumentPicker.tsx";
 import { ModeToggle } from "./ModeToggle.tsx";
 import { Toggle } from "./Toggle.tsx";
@@ -50,6 +51,7 @@ export function SettingsPanel({ settings, update }: Props) {
 					update({ referenceAvailableBeforeAttempt })
 				}
 			/>
+			<GradeSummary settings={settings} />
 		</section>
 	);
 }

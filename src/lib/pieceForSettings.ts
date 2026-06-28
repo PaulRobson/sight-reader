@@ -39,6 +39,28 @@ export function comfortableRange(
 	};
 }
 
+// The comfortable note band (and its tessitura centre) the current settings
+// generate within: the grade-scaled span around the staff centre, clamped to the
+// instrument's range. Piano (grand staff) centres on middle C.
+export function rangeForSettings(settings: Settings): {
+	lowestMidi: number;
+	highestMidi: number;
+	centerMidi: number;
+} {
+	const instrument = findInstrument(settings.instrumentId);
+	const grade = asGrade(settings.grade);
+	const center = isGrandStaff(instrument)
+		? GRAND_STAFF_CENTER
+		: STAFF_CENTER[settings.clef];
+	const range = comfortableRange(
+		center,
+		grade,
+		spnToMidi(instrument.lowestWrittenNote),
+		spnToMidi(instrument.highestWrittenNote),
+	);
+	return { ...range, centerMidi: center };
+}
+
 // Written-pitch abc for the current settings + seed: grade drives difficulty,
 // generation sits in a grade-scaled comfortable band around the staff (within
 // the instrument's range), the key is derived per grade. The abc stays at
@@ -49,19 +71,13 @@ export function pieceForSettings(settings: Settings, seed: number): string {
 	const instrument = findInstrument(settings.instrumentId);
 	const grandStaff = isGrandStaff(instrument);
 	const grade = asGrade(settings.grade);
-	const center = grandStaff ? GRAND_STAFF_CENTER : STAFF_CENTER[settings.clef];
-	const range = comfortableRange(
-		center,
-		grade,
-		spnToMidi(instrument.lowestWrittenNote),
-		spnToMidi(instrument.highestWrittenNote),
-	);
+	const range = rangeForSettings(settings);
 	const melody = generateForGrade({
 		grade,
 		lowestMidi: range.lowestMidi,
 		highestMidi: range.highestMidi,
 		seed,
-		centerMidi: center,
+		centerMidi: range.centerMidi,
 	});
 	return toAbc(melody, {
 		tempo: melody.tempo,
