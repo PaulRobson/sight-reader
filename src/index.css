@@ -60,7 +60,11 @@ main {
 	min-height: 100dvh;
 	max-width: 64rem;
 	margin: 0 auto;
-	padding: 1.5rem;
+	/* Honour the notch / home indicator so nothing sits under them (§9). */
+	padding: max(1.5rem, env(safe-area-inset-top))
+		max(1.5rem, env(safe-area-inset-right))
+		max(1.5rem, env(safe-area-inset-bottom))
+		max(1.5rem, env(safe-area-inset-left));
 	gap: 1.5rem;
 }
 
@@ -136,7 +140,8 @@ h1 {
 	color: var(--muted);
 }
 
-/* Buttons — flat: outlined secondary, solid primary */
+/* Buttons — flat: outlined secondary, solid primary. min 44px touch target;
+   touch-action/user-select stop double-tap zoom + stray selection on tap (§9). */
 button {
 	font: inherit;
 	font-weight: 600;
@@ -146,7 +151,11 @@ button {
 	border-radius: var(--r-control);
 	padding: 0.7rem 1.25rem;
 	min-height: 44px;
+	min-width: 44px;
 	cursor: pointer;
+	touch-action: manipulation;
+	user-select: none;
+	-webkit-user-select: none;
 	transition:
 		background 0.2s ease-out,
 		border-color 0.2s ease-out,
@@ -194,6 +203,25 @@ button:focus-visible {
 .finish-attempt {
 	align-self: center;
 	font-size: 1.1rem;
+}
+
+/* Tappable labels: single-tap, no double-tap zoom, no text selection (§9). */
+.rating-option,
+.key-correct,
+.settings-panel .toggle,
+.mode-toggle label,
+.clef-selector label {
+	touch-action: manipulation;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+/* Glance-able signals are read, never selected. */
+.play-now-banner,
+.countdown-value,
+.view-label {
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 nav {
@@ -612,5 +640,36 @@ legend {
 	textarea,
 	input[type="number"] {
 		transition: none;
+	}
+}
+
+/* Phone: compact single column, systems scrolling vertically (§9). Tablet touch
+   targets are untouched — only spacing tightens. */
+@media (max-width: 540px) {
+	main {
+		gap: 1rem;
+		padding: max(0.85rem, env(safe-area-inset-top))
+			max(0.85rem, env(safe-area-inset-right))
+			max(0.85rem, env(safe-area-inset-bottom))
+			max(0.85rem, env(safe-area-inset-left));
+	}
+
+	.score {
+		padding: 0.85rem 0.9rem;
+	}
+
+	.settings-panel,
+	.assessment,
+	.history {
+		padding: 1.25rem;
+	}
+}
+
+/* Landscape tablet/desktop (the music-stand orientation): the score uses more of
+   the width so it renders larger and dominates (abcjs scales the SVG to the
+   container width); controls stay a slim bottom bar (§9). */
+@media (orientation: landscape) and (min-width: 768px) {
+	main {
+		max-width: 80rem;
 	}
 }

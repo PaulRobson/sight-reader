@@ -8,6 +8,7 @@ import { useAttemptMetronome } from "./lib/useAttemptMetronome.ts";
 import { useAttemptSession } from "./lib/useAttemptSession.ts";
 import { useSettings } from "./lib/useSettings.ts";
 import { useViewState } from "./lib/useViewState.ts";
+import { useWakeLock } from "./lib/useWakeLock.ts";
 
 export default function App() {
 	const [view, dispatch] = useViewState();
@@ -22,6 +23,8 @@ export default function App() {
 		abc,
 		settings.metronomeOnAttempt,
 	);
+	// Keep the screen awake through the prep countdown and the attempt (§9).
+	useWakeLock(view === "prep" || view === "playNow");
 
 	// Arm inside the gesture so iOS unlocks audio (§9); the count-in fires later
 	// at the countdown-zero transition, which is not itself a gesture.

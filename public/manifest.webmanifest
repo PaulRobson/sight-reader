@@ -1,0 +1,19 @@
+{
+	"name": "Sight-Reading Trainer",
+	"short_name": "Sight Reader",
+	"description": "Generates sight-reading exercises, renders them as sheet music, and plays a reference matched to your instrument.",
+	"start_url": ".",
+	"scope": ".",
+	"display": "standalone",
+	"orientation": "any",
+	"background_color": "#E0E5EC",
+	"theme_color": "#E0E5EC",
+	"icons": [
+		{
+			"src": "icon.svg",
+			"sizes": "any",
+			"type": "image/svg+xml",
+			"purpose": "any maskable"
+		}
+	]
+}
