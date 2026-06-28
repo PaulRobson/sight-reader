@@ -30,4 +30,43 @@ function fullBarRest(total: number): string {
 		: pieces.map((p) => `z${lengthOf(p)}`).join(" ");
 }
 
-export const abcDuration = { split, lengthOf, fullBarRest };
+// Rest values largest-first. Dotted-quarter (6) covers compound beats; binary
+// values cover simple/cut. Larger/dotted-finer values are reached by combination.
+const REST_VALUES = [8, 6, 4, 2, 1];
+
+// A rest value v fits at bar-position pos when it starts on its own grid and
+// either stays inside one beat or spans whole beats from a beat boundary — so a
+// run never crosses a beat line with a partial rest (keeps the metre legible).
+function restFits(pos: number, v: number, beat: number): boolean {
+	if (pos % v !== 0) return false;
+	const crosses = Math.floor(pos / beat) !== Math.floor((pos + v - 1) / beat);
+	return !crosses || (pos % beat === 0 && v % beat === 0);
+}
+
+// Merge a run of consecutive rests (starting `start` sixteenths into the bar, of
+// `length`, with the metre's `beat` group) into as few rests as the grid allows:
+// four eighth-rests at a bar start become one half rest, but a run across beat 3
+// of 4/4 stays split there.
+function restRun(start: number, length: number, beat: number): string {
+	const pieces: string[] = [];
+	let pos = start;
+	let rem = length;
+	while (rem > 0) {
+		const v = REST_VALUES.find((x) => x <= rem && restFits(pos, x, beat)) ?? 1;
+		pieces.push(`z${lengthOf(v)}`);
+		pos += v;
+		rem -= v;
+	}
+	return pieces.join(" ");
+}
+
+// Sixteenths per beam/beat group: a quarter for simple metres, a dotted quarter
+// for compound (x/8 with a multiple-of-3 numerator), a half for cut time.
+function beatUnits(meter: string): number {
+	const [num, den] = meter.split("/").map(Number);
+	if (den === 2) return 8;
+	if (den === 8 && num % 3 === 0) return 6;
+	return 4;
+}
+
+export const abcDuration = { split, lengthOf, fullBarRest, restRun, beatUnits };

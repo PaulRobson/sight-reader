@@ -55,33 +55,35 @@ function pitchToken(note: Note, acc: string): string {
 		.join("-");
 }
 
-// L:1/16, so a slot's duration in sixteenth units is its abc length multiplier;
-// slurs wrap the note in parens, decorations prefix it.
+// A pitched note (rests are merged and rendered by renderBar). L:1/16, so the
+// duration is its abc length multiplier; slurs wrap it in parens, decorations
+// prefix it.
 function noteToken(
 	note: Note,
 	keySig: Record<string, number>,
 	bar: Record<string, number>,
 ): string {
 	const deco = decorations(note);
-	if (note.rest) return `${deco}z${abcDuration.lengthOf(note.duration)}`;
 	const body = pitchToken(note, accidentalToken(note, keySig, bar));
 	return `${note.slurStart ? "(" : ""}${deco}${body}${note.slurEnd ? ")" : ""}`;
 }
 
-// Sixteenths per beam group: a quarter for simple meters, a dotted quarter for
-// compound (x/8 with a multiple-of-3 numerator), a half for cut time. abc beams
-// notes written without a space between them, broken at these beat boundaries.
-function beatUnits(meter: string): number {
-	const [num, den] = meter.split("/").map(Number);
-	if (den === 2) return 8;
-	if (den === 8 && num % 3 === 0) return 6;
-	return 4;
+// Combine consecutive rests into one rest each, so the bar lays them out as
+// merged rest values (a half rest, say) rather than one token per slot.
+function mergeRests(notes: Note[]): Note[] {
+	const out: Note[] = [];
+	for (const n of notes) {
+		const prev = out[out.length - 1];
+		if (n.rest && prev?.rest) prev.duration += n.duration;
+		else out.push({ ...n });
+	}
+	return out;
 }
 
-// One bar's tokens. An entirely-rested bar collapses to a whole-measure rest.
-// Sub-quarter notes inside the same beat are beamed (no separating space);
-// quarters, rests, and beat boundaries break the beam. Accidentals are local to
-// the bar, so the persistence state starts fresh here.
+// One bar's tokens. An entirely-rested bar collapses to a whole-measure rest;
+// other rest runs merge to the fewest values the metre allows. Sub-quarter notes
+// inside the same beat are beamed (no separating space); quarters, rests, and
+// beat boundaries break the beam. Accidentals are local to the bar.
 function renderBar(
 	notes: Note[],
 	keySig: Record<string, number>,
@@ -93,8 +95,10 @@ function renderBar(
 	let out = "";
 	let pos = 0;
 	let prevBeamable = false;
-	for (const note of notes) {
-		const token = noteToken(note, keySig, bar);
+	for (const note of mergeRests(notes)) {
+		const token = note.rest
+			? abcDuration.restRun(pos, note.duration, beat)
+			: noteToken(note, keySig, bar);
 		const beamable = !note.rest && note.duration < 4;
 		const beamed = out !== "" && beamable && prevBeamable && pos % beat !== 0;
 		out += beamed ? token : `${out === "" ? "" : " "}${token}`;
@@ -113,7 +117,7 @@ export function noteStream(
 	meter: string,
 ): string {
 	const keySig = keySignature(key);
-	const beat = beatUnits(meter);
+	const beat = abcDuration.beatUnits(meter);
 	const bars: string[] = [];
 	let current: Note[] = [];
 	let acc = 0;

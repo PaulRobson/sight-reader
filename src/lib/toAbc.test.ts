@@ -235,6 +235,54 @@ describe("toAbc", () => {
 		expect(fiveEight).toContain("C8-C2");
 	});
 
+	it("merges consecutive rests into a single rest value", () => {
+		const melody: Melody = {
+			key: "C",
+			bars: 1,
+			barUnits: 16,
+			notes: [
+				{ midi: 60, letter: "C", accidental: 0, octave: 4, duration: 8 }, // half note, beats 1-2
+				// beats 3-4: four eighth rests that should merge to one half rest
+				{
+					midi: 60,
+					letter: "C",
+					accidental: 0,
+					octave: 4,
+					duration: 2,
+					rest: true,
+				},
+				{
+					midi: 60,
+					letter: "C",
+					accidental: 0,
+					octave: 4,
+					duration: 2,
+					rest: true,
+				},
+				{
+					midi: 60,
+					letter: "C",
+					accidental: 0,
+					octave: 4,
+					duration: 2,
+					rest: true,
+				},
+				{
+					midi: 60,
+					letter: "C",
+					accidental: 0,
+					octave: 4,
+					duration: 2,
+					rest: true,
+				},
+			],
+		};
+		const abc = toAbc(melody);
+		expect(abc).toContain("z8");
+		expect(abc).not.toContain("z2");
+		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
+	});
+
 	it("emits z tokens for rested slots and still parses cleanly", () => {
 		const melody = generateMelody(grade1);
 		melody.notes[1] = { ...melody.notes[1], rest: true };
