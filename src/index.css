@@ -116,6 +116,26 @@ h1 {
 		inset -2px -2px 4px var(--sh-light);
 }
 
+.start-prompt {
+	background: var(--paper);
+	border-radius: 10px;
+	padding: 3rem 1.5rem;
+	text-align: center;
+	box-shadow:
+		inset 2px 2px 4px var(--sh-dark),
+		inset -2px -2px 4px var(--sh-light);
+}
+
+.start-prompt p {
+	margin: 0;
+	font-size: 1.25rem;
+	color: var(--muted);
+}
+
+.start-prompt strong {
+	color: var(--text);
+}
+
 /* Buttons — flat: outlined secondary, solid primary */
 button {
 	font: inherit;
