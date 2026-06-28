@@ -10,10 +10,11 @@ const ACCIDENTAL_PREFIX: Record<number, string> = {
 	2: "^^",
 };
 
-// Default accidental each letter carries from the key signature.
+// Default accidental each letter carries from the key signature (natural minor
+// for a minor key, matching the signature abcjs draws for K:Am etc.).
 function keySignature(key: string): Record<string, number> {
 	const sig: Record<string, number> = {};
-	for (const d of scale.major(key)) sig[d.letter] = d.accidental;
+	for (const d of scale.degrees(key)) sig[d.letter] = d.accidental;
 	return sig;
 }
 

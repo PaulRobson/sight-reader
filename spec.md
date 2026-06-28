@@ -213,7 +213,7 @@ Device work. Each concern is split into an auto implementation task (verified by
 
 Generate at **written pitch in the chosen written key**. Structure the piece as **phrases** (default 4 bars), because phrase-level repetition is what makes output sound musical.
 
-**Step 1 — Choose key & scale.** Pick a written key signature allowed by the grade (§5). Build the diatonic scale-degree set. Identify chord tones (degrees 1, 3, 5) for start/end anchoring.
+**Step 1 — Choose key & scale.** Pick a written key signature allowed by the grade (§5). Build the diatonic scale-degree set. Identify chord tones (degrees 1, 3, 5) for start/end anchoring. **Major or minor:** keys are major or (~40% of the time, seeded) natural minor, chosen across all grades; a minor key carries a trailing `m` (`"Am"`), uses its relative-major signature (so it fits the same `maxKeyAccidentals` tiers), and gets harmonic-minor cadences — the ♭7 is raised to a leading tone wherever it resolves up by step to the tonic (`raiseLeadingTones`), rendered as an explicit accidental. Melodic minor and church modes are out of scope.
 
 **Step 2 — Choose rhythm per bar.** For each bar, draw a rhythmic cell from the library for the current time signature, weighted by grade (lower grades favour longer notes). A cell is an ordered list of durations summing to one bar, e.g. 4/4 cells: `[whole]`, `[half,half]`, `[quarter,quarter,half]`, `[quarter×4]`, and at higher grades `[eighth×2, quarter, quarter, ...]`, dotted figures, triplets, sixteenths. Insert rests by replacing some cell slots per the grade's rest probability.
 

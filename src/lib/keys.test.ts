@@ -4,9 +4,10 @@ import { keys } from "./keys.ts";
 import { mulberry32 } from "./mulberry32.ts";
 import { scale } from "./scale.ts";
 
-// A major key's signature size = number of degrees spelled with an accidental.
+// A key's signature size = number of degrees spelled with an accidental (natural
+// minor for a minor key, matching its relative major's signature).
 function signatureSize(key: string): number {
-	return scale.major(key).filter((d) => d.accidental !== 0).length;
+	return scale.degrees(key).filter((d) => d.accidental !== 0).length;
 }
 
 describe("keys.within", () => {
@@ -43,5 +44,23 @@ describe("keys.pick", () => {
 		for (let seed = 1; seed <= 30; seed++)
 			seen.add(keys.pick(5, mulberry32(seed)));
 		expect(seen.size).toBeGreaterThan(1);
+	});
+
+	it("produces both major and minor keys across seeds", () => {
+		let major = 0;
+		let minor = 0;
+		for (let seed = 1; seed <= 60; seed++)
+			keys.pick(3, mulberry32(seed)).endsWith("m") ? minor++ : major++;
+		expect(minor).toBeGreaterThan(0);
+		expect(major).toBeGreaterThan(0);
+	});
+});
+
+describe("keys.minorWithin", () => {
+	it("returns relative minors within the signature breadth", () => {
+		expect(keys.minorWithin(0)).toEqual(["Am"]);
+		expect(keys.minorWithin(1)).toEqual(["Am", "Em", "Dm"]);
+		for (const key of keys.minorWithin(4))
+			expect(signatureSize(key)).toBeLessThanOrEqual(4);
 	});
 });

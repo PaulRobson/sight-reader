@@ -7,6 +7,7 @@ import { insertAccidentals } from "./insertAccidentals.ts";
 import { insertRests, preventFullBarRests } from "./insertRests.ts";
 import { keys } from "./keys.ts";
 import { mulberry32 } from "./mulberry32.ts";
+import { raiseLeadingTones } from "./raiseLeadingTones.ts";
 import { rhythm } from "./rhythm.ts";
 import { scale } from "./scale.ts";
 
@@ -66,16 +67,21 @@ export function generateForGrade(
 		insertRests(melody.notes, p.restProbability, rng),
 		melody.barUnits,
 	);
-	const scalePitchClasses = new Set(scale.major(key).map((d) => d.pitchClass));
-	const accented = insertAccidentals(
-		rested,
-		p.accidentals,
-		{
-			scalePitchClasses,
-			lowestMidi: args.lowestMidi,
-			highestMidi: args.highestMidi,
-		},
-		rng,
+	const scalePitchClasses = new Set(
+		scale.degrees(key).map((d) => d.pitchClass),
+	);
+	const accented = raiseLeadingTones(
+		insertAccidentals(
+			rested,
+			p.accidentals,
+			{
+				scalePitchClasses,
+				lowestMidi: args.lowestMidi,
+				highestMidi: args.highestMidi,
+			},
+			rng,
+		),
+		key,
 	);
 	// Note count per phrase = its span's durations length, so cumulative sums give
 	// the phrase-start indices into the (length-preserved) note stream.

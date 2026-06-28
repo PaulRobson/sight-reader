@@ -3,7 +3,7 @@ import { type ScaleNote, scale } from "./scale.ts";
 
 export type GeneratorOptions = {
 	seed: number;
-	key: string; // written tonic, e.g. "C"
+	key: string; // written key, e.g. "C" or "Am" (trailing m = minor)
 	bars: number;
 	lowestMidi: number; // range clamp (inclusive)
 	highestMidi: number;
@@ -29,7 +29,7 @@ export type PitchSpace = {
 
 // All diatonic pitches of the key within range, ascending by MIDI.
 function buildPitches(key: string, lo: number, hi: number): Pitch[] {
-	const degrees = scale.major(key);
+	const degrees = scale.degrees(key);
 	const pitches: Pitch[] = [];
 	for (let octave = 0; octave <= 9; octave++) {
 		for (const d of degrees) {
@@ -77,7 +77,7 @@ function indexNearestMidi(pitches: Pitch[], midi: number): number {
 
 // The diatonic pitch ladder for a key/range plus its tonic and cadence anchors.
 export function pitchSpace(opts: GeneratorOptions): PitchSpace {
-	const degrees = scale.major(opts.key);
+	const degrees = scale.degrees(opts.key);
 	const pitches = buildPitches(opts.key, opts.lowestMidi, opts.highestMidi);
 	const tonics = degreeIndices(pitches, degrees[0]);
 	const center =

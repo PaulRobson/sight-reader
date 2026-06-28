@@ -1,8 +1,12 @@
+import abcjs from "abcjs";
 import { describe, expect, it } from "vitest";
 import { generateForGrade } from "./generateForGrade.ts";
 import { type Grade, gradeDifficulty } from "./gradeDifficulty.ts";
 import { rhythm } from "./rhythm.ts";
 import { scale } from "./scale.ts";
+import { toAbc } from "./toAbc.ts";
+
+const pitchClass = (midi: number) => ((midi % 12) + 12) % 12;
 
 const GRADES: Grade[] = [1, 2, 3, 4, 5, 6, 7, 8];
 const KEY = "C";
@@ -68,9 +72,32 @@ describe("generateForGrade", () => {
 		expect(seen.size).toBeGreaterThan(1); // selection actually spans meters
 	});
 
+	it("generates minor pieces that end on the minor tonic with a leading-tone cadence", () => {
+		let sawLeadingTone = false;
+		for (let seed = 1; seed <= 10; seed++) {
+			const m = generateForGrade({
+				grade: 5,
+				key: "Am",
+				lowestMidi: LO,
+				highestMidi: HI,
+				seed,
+			});
+			expect(m.key).toBe("Am");
+			const sounding = m.notes.filter((n) => !n.rest);
+			expect(pitchClass(sounding[sounding.length - 1].midi)).toBe(9); // ends on A
+			// G# (pitch class 8) is the raised leading tone, foreign to A minor
+			if (m.notes.some((n) => pitchClass(n.midi) === 8)) sawLeadingTone = true;
+			const abc = toAbc(m, { tempo: m.tempo, meter: m.timeSignature });
+			expect(abc).toContain("K:Am");
+			expect(abcjs.parseOnly(abc)[0].warnings, `seed ${seed}`).toBeUndefined();
+		}
+		expect(sawLeadingTone).toBe(true);
+	});
+
 	it("derives a key within the grade's signature breadth, and honours an override", () => {
+		// natural-minor degrees give a minor key's signature (its relative major's).
 		const sigSize = (key: string) =>
-			scale.major(key).filter((d) => d.accidental !== 0).length;
+			scale.degrees(key).filter((d) => d.accidental !== 0).length;
 		for (const grade of GRADES) {
 			const max = gradeDifficulty[grade].maxKeyAccidentals;
 			for (let seed = 1; seed <= 8; seed++) {
