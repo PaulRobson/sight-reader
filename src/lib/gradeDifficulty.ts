@@ -37,7 +37,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["f", "p"],
 		articulations: [],
 		accidentals: "none",
-		restProbability: 0.1,
+		restProbability: 0.05,
 	},
 	2: {
 		bars: [8, 8],
@@ -49,7 +49,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["p", "mp", "mf", "f"],
 		articulations: ["slur"],
 		accidentals: "rare",
-		restProbability: 0.15,
+		restProbability: 0.08,
 	},
 	3: {
 		bars: [8, 12],
@@ -61,7 +61,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["p", "mp", "mf", "f", "cresc", "dim"],
 		articulations: ["slur", "staccato"],
 		accidentals: "passing",
-		restProbability: 0.2,
+		restProbability: 0.1,
 	},
 	4: {
 		bars: [12, 12],
@@ -73,7 +73,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["p", "mp", "mf", "f", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "occasional",
-		restProbability: 0.25,
+		restProbability: 0.12,
 	},
 	5: {
 		bars: [12, 16],
@@ -85,7 +85,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "regular",
-		restProbability: 0.3,
+		restProbability: 0.14,
 	},
 	6: {
 		bars: [16, 16],
@@ -107,7 +107,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "chromatic",
-		restProbability: 0.35,
+		restProbability: 0.16,
 	},
 	7: {
 		bars: [16, 20],
@@ -130,7 +130,7 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "frequent",
-		restProbability: 0.4,
+		restProbability: 0.18,
 	},
 	8: {
 		bars: [20, 24],
@@ -154,6 +154,6 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "modulation",
-		restProbability: 0.4,
+		restProbability: 0.2,
 	},
 };

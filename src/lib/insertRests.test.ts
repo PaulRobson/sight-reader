@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Note } from "./generateMelody.ts";
-import { insertRests, limitFullBarRests } from "./insertRests.ts";
+import { insertRests, preventFullBarRests } from "./insertRests.ts";
 import { mulberry32 } from "./mulberry32.ts";
 
 const makeNotes = (count: number): Note[] =>
@@ -64,7 +64,7 @@ describe("insertRests", () => {
 	});
 });
 
-describe("limitFullBarRests", () => {
+describe("preventFullBarRests", () => {
 	const note = (rest: boolean): Note => ({
 		midi: 60,
 		letter: "C",
@@ -90,7 +90,7 @@ describe("limitFullBarRests", () => {
 		return flags;
 	};
 
-	it("breaks a run of all-rest bars but keeps a lone one", () => {
+	it("un-rests every all-rest bar, including a lone one", () => {
 		// bars: note, rest, rest, rest, note
 		const input = [
 			note(false),
@@ -99,20 +99,22 @@ describe("limitFullBarRests", () => {
 			note(true),
 			note(false),
 		];
-		const flags = barFlags(limitFullBarRests(input, 8), 8);
-		expect(flags).toEqual([false, true, false, true, false]); // no two true in a row
+		const flags = barFlags(preventFullBarRests(input, 8), 8);
+		expect(flags).toEqual([false, false, false, false, false]); // none silent
 	});
 
 	it("restores the bar's pitch when un-resting", () => {
 		const input = [note(false), note(true), note(true)];
-		const out = limitFullBarRests(input, 8);
+		const out = preventFullBarRests(input, 8);
 		expect(out[2].rest).toBe(false);
 		expect(out[2].midi).toBe(60);
 	});
 
-	it("leaves a single all-rest bar untouched", () => {
-		const input = [note(false), note(true), note(false)];
-		const out = limitFullBarRests(input, 8);
+	it("only un-rests the first slot of a multi-slot all-rest bar", () => {
+		const half = (rest: boolean): Note => ({ ...note(rest), duration: 4 });
+		// one bar of two rested quarters at barUnits 8
+		const out = preventFullBarRests([half(true), half(true)], 8);
+		expect(out[0].rest).toBe(false);
 		expect(out[1].rest).toBe(true);
 	});
 });

@@ -93,7 +93,7 @@ describe("generateForGrade", () => {
 		expect(pinned.key).toBe("C");
 	});
 
-	it("never emits two whole-bar rests in a row", () => {
+	it("never emits a whole-bar rest", () => {
 		const barAllRest = (m: ReturnType<typeof generateForGrade>): boolean[] => {
 			const flags: boolean[] = [];
 			let acc = 0;
@@ -119,8 +119,7 @@ describe("generateForGrade", () => {
 						seed,
 					}),
 				);
-				for (let i = 1; i < flags.length; i++)
-					expect(flags[i] && flags[i - 1]).toBe(false);
+				expect(flags).not.toContain(true);
 			}
 		}
 	});

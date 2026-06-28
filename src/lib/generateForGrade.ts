@@ -4,7 +4,7 @@ import type { Melody } from "./generateMelody.ts";
 import { generatePhrased, schemeForGrade } from "./generatePhrased.ts";
 import { type Grade, gradeDifficulty } from "./gradeDifficulty.ts";
 import { insertAccidentals } from "./insertAccidentals.ts";
-import { insertRests, limitFullBarRests } from "./insertRests.ts";
+import { insertRests, preventFullBarRests } from "./insertRests.ts";
 import { keys } from "./keys.ts";
 import { mulberry32 } from "./mulberry32.ts";
 import { rhythm } from "./rhythm.ts";
@@ -62,7 +62,7 @@ export function generateForGrade(
 		meter,
 		centerMidi: args.centerMidi,
 	});
-	const rested = limitFullBarRests(
+	const rested = preventFullBarRests(
 		insertRests(melody.notes, p.restProbability, rng),
 		melody.barUnits,
 	);
