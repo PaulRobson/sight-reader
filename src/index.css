@@ -72,6 +72,11 @@ main {
 	flex-wrap: wrap;
 }
 
+.app-header-actions {
+	display: flex;
+	gap: 0.5rem;
+}
+
 h1 {
 	font-family: var(--font-display);
 	font-weight: 800;

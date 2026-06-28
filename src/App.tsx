@@ -6,6 +6,7 @@ import { Countdown } from "./components/Countdown.tsx";
 import { ExerciseView } from "./components/ExerciseView.tsx";
 import { HistoryView } from "./components/HistoryView.tsx";
 import { SettingsPanel } from "./components/SettingsPanel.tsx";
+import { historyNav } from "./lib/historyNav.ts";
 import { keyLabel } from "./lib/keyLabel.ts";
 import { midiTransposeForInstrument } from "./lib/midiTransposeForInstrument.ts";
 import { useAttemptMetronome } from "./lib/useAttemptMetronome.ts";
@@ -42,14 +43,25 @@ export default function App() {
 		start();
 	}
 
+	const { inHistory, toggleHistory } = historyNav(
+		view,
+		settingsOpen,
+		setSettingsOpen,
+		dispatch,
+	);
+
 	return (
 		<main>
 			<AppHeader
 				settingsOpen={settingsOpen}
-				onToggle={() => setSettingsOpen((open) => !open)}
+				onToggleSettings={() => setSettingsOpen((open) => !open)}
+				inHistory={inHistory}
+				onToggleHistory={toggleHistory}
 			/>
 			{settingsOpen ? (
 				<SettingsPanel settings={settings} update={update} />
+			) : inHistory ? (
+				<HistoryView logs={logs} />
 			) : (
 				<>
 					{view !== "settings" ? (
@@ -81,7 +93,6 @@ export default function App() {
 							onSubmit={saveAttempt}
 						/>
 					) : null}
-					{view === "history" ? <HistoryView logs={logs} /> : null}
 					<Controls onStart={handleStart} dispatch={dispatch} />
 				</>
 			)}

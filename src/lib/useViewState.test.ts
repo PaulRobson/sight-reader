@@ -9,9 +9,9 @@ describe("viewReducer", () => {
 		expect(viewReducer("assess", { type: "saveAttempt" })).toBe("settings");
 	});
 
-	it("opens and closes history", () => {
-		expect(viewReducer("settings", { type: "openHistory" })).toBe("history");
-		expect(viewReducer("assess", { type: "openHistory" })).toBe("history");
+	it("opens history from any view and closes back to settings", () => {
+		for (const v of ["settings", "prep", "playNow", "assess"] as View[])
+			expect(viewReducer(v, { type: "openHistory" })).toBe("history");
 		expect(viewReducer("history", { type: "closeHistory" })).toBe("settings");
 	});
 

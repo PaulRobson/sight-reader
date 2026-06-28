@@ -15,12 +15,6 @@ export function Controls({ onStart, dispatch }: Props) {
 			<button type="button" onClick={() => dispatch({ type: "finishAttempt" })}>
 				Finish attempt
 			</button>
-			<button type="button" onClick={() => dispatch({ type: "openHistory" })}>
-				History
-			</button>
-			<button type="button" onClick={() => dispatch({ type: "closeHistory" })}>
-				Back
-			</button>
 		</nav>
 	);
 }
