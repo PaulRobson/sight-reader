@@ -421,6 +421,10 @@ legend {
 	gap: 0.75rem;
 }
 
+.history-show-piece {
+	align-self: flex-start;
+}
+
 .history-item-head time {
 	font-family: var(--font-display);
 	font-weight: 600;

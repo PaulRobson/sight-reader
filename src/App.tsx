@@ -6,9 +6,8 @@ import { Countdown } from "./components/Countdown.tsx";
 import { ExerciseView } from "./components/ExerciseView.tsx";
 import { HistoryView } from "./components/HistoryView.tsx";
 import { SettingsPanel } from "./components/SettingsPanel.tsx";
-import { findInstrument } from "./lib/instruments.ts";
 import { keyLabel } from "./lib/keyLabel.ts";
-import { transposition } from "./lib/transposition.ts";
+import { midiTransposeForInstrument } from "./lib/midiTransposeForInstrument.ts";
 import { useAttemptMetronome } from "./lib/useAttemptMetronome.ts";
 import { useAttemptSession } from "./lib/useAttemptSession.ts";
 import { useSettings } from "./lib/useSettings.ts";
@@ -21,11 +20,6 @@ const labels: Record<View, string> = {
 	assess: "Self-assessment",
 	history: "History",
 };
-
-// Sounding-pitch transpose for the synth (§6); the score stays at written pitch.
-function midiTransposeForInstrument(instrumentId: string): number {
-	return transposition.synthMidiTranspose(findInstrument(instrumentId));
-}
 
 export default function App() {
 	const [view, dispatch] = useViewState();

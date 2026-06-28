@@ -15,17 +15,21 @@ export function useAttemptSession(
 	const [seed, setSeed] = useState(1);
 	const [abc, setAbc] = useState(() => defaultPiece());
 	const [grade, setGrade] = useState(settings.grade);
+	const [instrumentId, setInstrumentId] = useState(settings.instrumentId);
 
 	function start() {
 		const nextSeed = Date.now();
 		setSeed(nextSeed);
 		setAbc(pieceForSettings(settings, nextSeed));
 		setGrade(settings.grade);
+		setInstrumentId(settings.instrumentId);
 		dispatch({ type: "start" });
 	}
 
+	// Persist the rendered piece (and its instrument) alongside the ratings so it
+	// can be reviewed and replayed from history.
 	function saveAttempt(log: AttemptLog) {
-		attempts.save(log);
+		attempts.save({ ...log, abc, instrumentId });
 		dispatch({ type: "saveAttempt" });
 	}
 

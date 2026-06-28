@@ -129,7 +129,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] "PLAY NOW!" banner rendered on entering the `playNow` state (large, high-contrast). **Done:** banner element appears on the state transition; build + lint pass.
 - [x] `[test]` Self-assessment form: the 5 `AttemptLog` dimensions + optional notes. **Done:** produces a valid `AttemptLog`; validation/state tested.
 - [x] `[test]` Save attempt to localStorage keyed by `pieceId`; "Try again (same piece)" reuses the seed, "New piece" reseeds. **Done:** attempt persists; same seed regenerates identical abc; tested.
-- [x] `[test]` History view: past attempts with date/grade/ratings + per-dimension average. **Done:** list renders; aggregation tested. `AttemptLog` (§2) now carries `grade`, captured from `settings.grade` when the piece is generated and shown per attempt.
+- [x] `[test]` History view: past attempts with date/grade/ratings + per-dimension average. **Done:** list renders; aggregation tested. `AttemptLog` (§2) now carries `grade`, captured from `settings.grade` when the piece is generated and shown per attempt. Each attempt also saves the piece (`abc` + `instrumentId`); a per-item "Show piece" toggle (`HistoryItem`) re-renders the score and offers playback via `ExerciseView`, so past pieces can be reviewed and replayed (attempts saved before this carry no piece and show no toggle).
 
 **Manual checkpoints (end of slice):**
 - [x] `[manual]` At countdown zero the "PLAY NOW!" banner is readable from music-stand distance.

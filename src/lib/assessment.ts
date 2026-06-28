@@ -10,7 +10,9 @@ const RATING_LABELS: Record<Rating, string> = {
 };
 
 // §2 data model. pieceId + grade + ratedAt come from the attempt context, not the
-// form. correctKey records whether the student read/played the right key.
+// form. correctKey records whether the student read/played the right key. abc +
+// instrumentId are captured so the piece can be re-rendered and replayed from
+// history (optional: attempts saved before this carry neither).
 export type AttemptLog = {
 	pieceId: string;
 	grade: number;
@@ -22,6 +24,8 @@ export type AttemptLog = {
 	overallConfidence: Rating;
 	correctKey?: boolean;
 	notes?: string;
+	abc?: string;
+	instrumentId?: string;
 };
 
 export type Dimension =

@@ -1,5 +1,6 @@
 import { type AttemptLog, assessment } from "../lib/assessment.ts";
 import { history } from "../lib/history.ts";
+import { HistoryItem } from "./HistoryItem.tsx";
 
 type Props = { logs: AttemptLog[] };
 
@@ -31,26 +32,7 @@ export function HistoryView({ logs }: Props) {
 					.slice()
 					.reverse()
 					.map((l) => (
-						<li key={`${l.pieceId}-${l.ratedAt}`} className="history-item">
-							<div className="history-item-head">
-								<time dateTime={new Date(l.ratedAt).toISOString()}>
-									{new Date(l.ratedAt).toLocaleString(undefined, {
-										dateStyle: "medium",
-										timeStyle: "short",
-									})}
-								</time>
-								<span className="grade-badge">Grade {l.grade}</span>
-							</div>
-							<div className="history-ratings">
-								{assessment.DIMENSIONS.map((d) => (
-									<div key={d.key} className="history-rating">
-										<span className="history-rating-value">{l[d.key]}</span>
-										<span className="history-rating-label">{d.short}</span>
-									</div>
-								))}
-							</div>
-							{l.notes ? <p className="history-notes">{l.notes}</p> : null}
-						</li>
+						<HistoryItem key={`${l.pieceId}-${l.ratedAt}`} log={l} />
 					))}
 			</ol>
 		</section>
