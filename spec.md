@@ -184,7 +184,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [x] Rhythm-only playback uses a woodblock/percussion timbre. **Done:** rhythm-only pieces emit `%%MIDI program 115` (GM 116 Woodblock, abcjs's `woodblock` sample) instead of the instrument's melodic program, so the reference plays a near-pitchless click — rhythm without pitch (§8). The constant `RHYTHM_GM_PROGRAM` lives with the rhythm-only generator; `pieceForSettings` passes it through `toAbc` for `mode === "rhythm-only"`. Tested: the rhythm-only abc's only `%%MIDI program` directive is 115 across instruments/seeds. (Instrument transposition still reaches the synth but is inaudible on a woodblock and irrelevant per §8; left untouched to avoid threading mode through the history-replay path.) Audible confirmation is the Slice 7 manual checkpoint.
 
 **Manual checkpoints (end of slice):**
-- [ ] `[manual]` Rhythm-only mode shows a single-line staff and plays a percussion click with no pitch.
+- [x] `[manual]` Rhythm-only mode shows a single-line staff and plays a percussion click with no pitch. **Verified.**
 
 ### Slice 8 — Tablet-first layout & iOS polish (§9)
 Device work. Each concern is split into an auto implementation task (verified by build + lint, plus a unit test where one is meaningful) and a device check in the Manual checkpoints block. Build them in order; verify the batch together on an iPad in Safari.
