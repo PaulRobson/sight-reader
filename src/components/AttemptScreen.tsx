@@ -38,6 +38,17 @@ export function AttemptScreen({
 	onStart,
 	onSaveAttempt,
 }: Props) {
+	// Idle: a prompt with its own Let's go, no bottom controls (nothing to finish).
+	if (view === "settings") {
+		return (
+			<section className="start-prompt">
+				<p>Start a new sight-reading exercise.</p>
+				<button type="button" className="primary" onClick={onStart}>
+					Let's go
+				</button>
+			</section>
+		);
+	}
 	return (
 		<>
 			{labels[view] ? (
@@ -45,18 +56,10 @@ export function AttemptScreen({
 					<p>{labels[view]}</p>
 				</section>
 			) : null}
-			{view === "settings" ? (
-				<section className="start-prompt">
-					<p>
-						Press <strong>Let's go</strong> to start a new exercise.
-					</p>
-				</section>
-			) : (
-				<ExerciseView
-					abc={abc}
-					midiTranspose={midiTransposeForInstrument(settings.instrumentId)}
-				/>
-			)}
+			<ExerciseView
+				abc={abc}
+				midiTranspose={midiTransposeForInstrument(settings.instrumentId)}
+			/>
 			{view === "prep" ? (
 				<Countdown
 					key={seed}
@@ -65,9 +68,18 @@ export function AttemptScreen({
 				/>
 			) : null}
 			{view === "playNow" ? (
-				<section className="play-now-banner" aria-label="play now">
-					PLAY NOW!
-				</section>
+				<>
+					<section className="play-now-banner" aria-label="play now">
+						PLAY NOW!
+					</section>
+					<button
+						type="button"
+						className="finish-attempt"
+						onClick={() => dispatch({ type: "finishAttempt" })}
+					>
+						Finish attempt
+					</button>
+				</>
 			) : null}
 			{view === "assess" ? (
 				<AssessmentForm
@@ -77,7 +89,7 @@ export function AttemptScreen({
 					onSubmit={onSaveAttempt}
 				/>
 			) : null}
-			<Controls onStart={onStart} dispatch={dispatch} />
+			<Controls onStart={onStart} />
 		</>
 	);
 }

@@ -117,6 +117,10 @@ h1 {
 }
 
 .start-prompt {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1.5rem;
 	background: var(--paper);
 	border-radius: 10px;
 	padding: 3rem 1.5rem;
@@ -130,10 +134,6 @@ h1 {
 	margin: 0;
 	font-size: 1.25rem;
 	color: var(--muted);
-}
-
-.start-prompt strong {
-	color: var(--text);
 }
 
 /* Buttons — flat: outlined secondary, solid primary */
@@ -188,6 +188,11 @@ button:focus-visible {
 
 .play {
 	align-self: flex-start;
+	font-size: 1.1rem;
+}
+
+.finish-attempt {
+	align-self: center;
 	font-size: 1.1rem;
 }
 
