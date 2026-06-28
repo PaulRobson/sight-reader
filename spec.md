@@ -188,7 +188,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 
 ### Slice 8 — Tablet-first layout & iOS polish (§9)
 Device work. Each concern is split into an auto implementation task (verified by build + lint, plus a unit test where one is meaningful) and a device check in the Manual checkpoints block. Build them in order; verify the batch together on an iPad in Safari.
-- [ ] `[test]` Debounce util; wire debounced re-render of the score on resize / orientation change.
+- [x] `[test]` Debounce util; wire debounced re-render of the score on resize / orientation change. **Done:** `debounce(fn, ms)` is a trailing-edge debounce with `cancel()` (unit-tested: burst collapse, latest-args, timer restart, separate bursts, cancel); `ExerciseView`'s render effect now re-runs `renderAbc` on debounced (150ms) `resize`/`orientationchange`, removing the listeners and cancelling any pending call on cleanup. Re-layout (not just CSS scaling) is needed because abcjs lays out to a fixed width per call (§9). Crisp re-render on rotate is the Slice 8 manual checkpoint.
 - [ ] Responsive layout: landscape score-dominant + slim rail; portrait stacked; phone single-column scroll. **Done:** layout implemented; build + lint pass.
 - [ ] Countdown + "PLAY NOW!" banner styling, sized and high-contrast for music-stand distance. **Done:** styles implemented; build + lint pass.
 - [ ] 44 pt touch targets; remove hover-only affordances; suppress double-tap zoom + stray text selection (`touch-action`, `user-select`). **Done:** implemented; build + lint pass.

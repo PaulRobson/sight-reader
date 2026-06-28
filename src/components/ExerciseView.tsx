@@ -1,5 +1,6 @@
 import abcjs, { type TuneObject } from "abcjs";
 import { useEffect, useRef } from "react";
+import { debounce } from "../lib/debounce.ts";
 import {
 	type AudioStatus,
 	useReferenceAudio,
@@ -23,17 +24,32 @@ export function ExerciseView({ abc, midiTranspose }: Props) {
 	);
 
 	useEffect(() => {
-		if (!scoreRef.current) return;
+		const el = scoreRef.current;
+		if (!el) return;
 		// Wrap by measures so higher grades break onto multiple lines instead of
 		// squeezing every bar onto one shrinking line (§9). staffwidth seeds the
-		// line-breaking; responsive then scales the result to the container.
-		const width = scoreRef.current.clientWidth || 720;
-		const tunes = abcjs.renderAbc(scoreRef.current, abc, {
-			responsive: "resize",
-			staffwidth: width,
-			wrap: { minSpacing: 1.8, maxSpacing: 2.7, preferredMeasuresPerLine: 4 },
-		});
-		visualObjRef.current = tunes[0] ?? null;
+		// line-breaking; responsive then scales the result to the container. abcjs
+		// lays out to a fixed width per call, so a viewport change needs a genuine
+		// re-render, not just CSS scaling (§9) — debounced so a resize/orientation
+		// drag collapses to one re-layout.
+		const render = () => {
+			const width = el.clientWidth || 720;
+			const tunes = abcjs.renderAbc(el, abc, {
+				responsive: "resize",
+				staffwidth: width,
+				wrap: { minSpacing: 1.8, maxSpacing: 2.7, preferredMeasuresPerLine: 4 },
+			});
+			visualObjRef.current = tunes[0] ?? null;
+		};
+		render();
+		const onResize = debounce(render, 150);
+		window.addEventListener("resize", onResize);
+		window.addEventListener("orientationchange", onResize);
+		return () => {
+			onResize.cancel();
+			window.removeEventListener("resize", onResize);
+			window.removeEventListener("orientationchange", onResize);
+		};
 	}, [abc]);
 
 	return (
