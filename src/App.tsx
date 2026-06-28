@@ -7,6 +7,7 @@ import { HistoryView } from "./components/HistoryView.tsx";
 import { SettingsPanel } from "./components/SettingsPanel.tsx";
 import { findInstrument } from "./lib/instruments.ts";
 import { transposition } from "./lib/transposition.ts";
+import { useAttemptMetronome } from "./lib/useAttemptMetronome.ts";
 import { useAttemptSession } from "./lib/useAttemptSession.ts";
 import { useSettings } from "./lib/useSettings.ts";
 import { useViewState, type View } from "./lib/useViewState.ts";
@@ -32,6 +33,18 @@ export default function App() {
 		settings,
 		dispatch,
 	);
+	const armMetronome = useAttemptMetronome(
+		view,
+		abc,
+		settings.metronomeOnAttempt,
+	);
+
+	// Arm inside the gesture so iOS unlocks audio (§9); the count-in fires later
+	// at the countdown-zero transition, which is not itself a gesture.
+	function handleStart() {
+		armMetronome();
+		start();
+	}
 
 	return (
 		<main>
@@ -79,7 +92,7 @@ export default function App() {
 						/>
 					) : null}
 					{view === "history" ? <HistoryView logs={logs} /> : null}
-					<Controls onStart={start} dispatch={dispatch} />
+					<Controls onStart={handleStart} dispatch={dispatch} />
 				</>
 			)}
 		</main>
