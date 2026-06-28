@@ -24,14 +24,30 @@ function pitchLetters(note: Note): string {
 		: `${note.letter.toUpperCase()}${",".repeat(Math.max(0, 4 - note.octave))}`;
 }
 
-// L:1/16, so a slot's duration in sixteenth units is its abc length multiplier.
-// An explicit accidental is emitted only when the note deviates from what's
-// currently in force (key signature, or an earlier accidental this bar), and
-// that deviation is recorded in `bar` so it persists to the bar line.
+// abc has no !staccato! decoration; the staccato dot is the "." shorthand. Other
+// tokens (dynamics, accent, tenuto) are wrapped !token!.
+const SHORTHAND: Record<string, string> = { staccato: "." };
+
 function decorations(note: Note): string {
-	return note.decorations?.map((d) => `!${d}!`).join("") ?? "";
+	return note.decorations?.map((d) => SHORTHAND[d] ?? `!${d}!`).join("") ?? "";
 }
 
+// Accidental prefix, emitted only when the note deviates from what's in force
+// (key signature or an earlier accidental this bar), recording it so it persists.
+function accidentalToken(
+	note: Note,
+	keySig: Record<string, number>,
+	bar: Record<string, number>,
+): string {
+	const id = `${note.letter}${note.octave}`;
+	const inForce = id in bar ? bar[id] : (keySig[note.letter] ?? 0);
+	if (note.accidental === inForce) return "";
+	bar[id] = note.accidental;
+	return ACCIDENTAL_PREFIX[note.accidental] ?? "";
+}
+
+// L:1/16, so a slot's duration in sixteenth units is its abc length multiplier;
+// slurs wrap the note in parens, decorations and accidentals prefix it.
 function noteToken(
 	note: Note,
 	keySig: Record<string, number>,
@@ -40,15 +56,9 @@ function noteToken(
 	const deco = decorations(note);
 	if (note.rest)
 		return `${deco}${note.duration === 1 ? "z" : `z${note.duration}`}`;
-	const id = `${note.letter}${note.octave}`;
-	const inForce = id in bar ? bar[id] : (keySig[note.letter] ?? 0);
-	let prefix = "";
-	if (note.accidental !== inForce) {
-		prefix = ACCIDENTAL_PREFIX[note.accidental] ?? "";
-		bar[id] = note.accidental;
-	}
 	const length = note.duration === 1 ? "" : `${note.duration}`;
-	return `${deco}${prefix}${pitchLetters(note)}${length}`;
+	const body = `${deco}${accidentalToken(note, keySig, bar)}${pitchLetters(note)}${length}`;
+	return `${note.slurStart ? "(" : ""}${body}${note.slurEnd ? ")" : ""}`;
 }
 
 // Sixteenths per beam group: a quarter for simple meters, a dotted quarter for
@@ -121,6 +131,8 @@ export function splitGrandStaff(notes: Note[]): {
 		...n,
 		rest: true,
 		decorations: undefined,
+		slurStart: undefined,
+		slurEnd: undefined,
 	});
 	return {
 		treble: notes.map((n) => (!n.rest && n.midi >= MIDDLE_C ? n : rest(n))),

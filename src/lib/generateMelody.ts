@@ -12,6 +12,8 @@ export type Note = {
 	duration: number; // sixteenth-note units
 	rest?: boolean; // slot is silent; pitch fields retained for walk continuity
 	decorations?: string[]; // abc decoration tokens (e.g. "f", "crescendo("), no !!
+	slurStart?: boolean; // emits "(" before the note
+	slurEnd?: boolean; // emits ")" after the note
 };
 
 export type Melody = {

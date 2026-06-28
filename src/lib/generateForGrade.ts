@@ -1,3 +1,4 @@
+import { applyArticulations } from "./applyArticulations.ts";
 import { applyDynamics } from "./applyDynamics.ts";
 import type { Melody } from "./generateMelody.ts";
 import { generatePhrased, schemeForGrade } from "./generatePhrased.ts";
@@ -84,6 +85,7 @@ export function generateForGrade(
 		acc += ph.durations.length;
 		return s;
 	});
-	const notes = applyDynamics(accented, phraseStarts, p.dynamics, rng);
+	const withDynamics = applyDynamics(accented, phraseStarts, p.dynamics, rng);
+	const notes = applyArticulations(withDynamics, p.articulations, rng);
 	return { ...melody, notes, tempo, timeSignature };
 }
