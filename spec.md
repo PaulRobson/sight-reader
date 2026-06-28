@@ -233,7 +233,7 @@ Generate at **written pitch in the chosen written key**. Structure the piece as 
 Choose the scheme by grade (simpler/more literal repetition at low grades).
 
 **Step 5 — Dynamics & articulation layer (grade-gated, see §5).**
-- Place a dynamic marking at the start of each phrase (`f`/`p` at low grades; add `mf`/`mp`, then hairpin `cresc.`/`dim.` higher up).
+- Place a dynamic marking at the start of each phrase (`f`/`p` at low grades; add `mf`/`mp`, then hairpin `cresc.`/`dim.` higher up). A hairpin spans at most 2 bars and resolves to a stated destination level (e.g. `cresc.` → `f`) so the swell has a defined target.
 - Add slurs over stepwise groups; staccato on detached repeated/leaping notes; accents/tenuto at higher grades.
 - In abcjs these are decorations, e.g. `!p!`, `!f!`, `!mf!`, `!crescendo(!`/`!crescendo)!`, `!staccato!` (`.`), `!accent!`, slurs via `( ... )`.
 

@@ -58,6 +58,28 @@ export function buildIndices(
 	return indices;
 }
 
+// Pull each note that follows a sixteenth-or-shorter note inward until the leap
+// into it is at most `maxSemitones`, so fast passages stay playable. `pitches` is
+// ascending by MIDI, so stepping the index toward the previous note shrinks the
+// interval. `protect` positions are never moved (e.g. cadence landings). Mutates.
+export function limitFastLeaps(
+	indices: number[],
+	durations: number[],
+	pitches: Pitch[],
+	maxSemitones: number,
+	protect?: Set<number>,
+): void {
+	for (let i = 1; i < indices.length; i++) {
+		if (durations[i - 1] > 1 || protect?.has(i)) continue;
+		const prevMidi = pitches[indices[i - 1]].midi;
+		while (
+			indices[i] !== indices[i - 1] &&
+			Math.abs(pitches[indices[i]].midi - prevMidi) > maxSemitones
+		)
+			indices[i] += indices[i] > indices[i - 1] ? -1 : 1;
+	}
+}
+
 // Last note = tonic, approached by step (leading tone or supertonic).
 export function finalizeCadence(indices: number[], tonics: number[]): void {
 	const n = indices.length;

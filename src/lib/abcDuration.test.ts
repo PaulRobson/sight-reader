@@ -21,6 +21,19 @@ describe("abcDuration.split", () => {
 	it("splits a 5/8 whole bar into a half tied to an eighth", () => {
 		expect(abcDuration.split(10)).toEqual([8, 2]);
 	});
+
+	it("treats a thirty-second (0.5) as a clean value and splits a dotted-sixteenth", () => {
+		expect(abcDuration.split(0.5)).toEqual([0.5]);
+		expect(abcDuration.split(1.5)).toEqual([1, 0.5]); // sixteenth tied to a 32nd
+	});
+});
+
+describe("abcDuration.lengthOf", () => {
+	it("renders sub-unit durations with a divisor (a thirty-second is /2)", () => {
+		expect(abcDuration.lengthOf(0.5)).toBe("/2");
+		expect(abcDuration.lengthOf(1)).toBe(""); // the unit (sixteenth)
+		expect(abcDuration.lengthOf(4)).toBe("4");
+	});
 });
 
 describe("abcDuration.fullBarRest", () => {

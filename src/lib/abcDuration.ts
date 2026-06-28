@@ -1,7 +1,7 @@
 // abc duration serialization. L:1/16, so a duration in sixteenth units is its
 // abc length multiplier. abcjs can't draw 5/9/10/11/13 sixteenths as one
 // notehead, so those split into clean values to be tied.
-const CLEAN = [16, 15, 14, 12, 8, 7, 6, 4, 3, 2, 1]; // single-notehead values (0–3 dots)
+const CLEAN = [16, 15, 14, 12, 8, 7, 6, 4, 3, 2, 1, 0.5]; // single noteheads; 0.5 = thirty-second
 const cleanSet = new Set(CLEAN);
 
 // Split a non-representable duration into clean values. Durations above a whole
@@ -19,7 +19,13 @@ function split(d: number): number[] {
 	return pieces;
 }
 
-const lengthOf = (d: number) => (d === 1 ? "" : `${d}`);
+// abc length multiplier at L:1/16: "" for the unit (a sixteenth), "/n" for a
+// sub-unit (a thirty-second is "/2"), the integer otherwise.
+function lengthOf(d: number): string {
+	if (d === 1) return "";
+	if (d < 1) return `/${Math.round(1 / d)}`;
+	return `${d}`;
+}
 
 // A whole-bar rest as a duration rest (z16, z24, …), not abc's `Z`: abcjs draws
 // a multi-measure count ("1") above every `Z`, even a single bar, which clutters

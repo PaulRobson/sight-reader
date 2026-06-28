@@ -12,7 +12,8 @@ export type AccidentalBreadth =
 
 // §5 difficulty table, machine-usable. One place to tune.
 // maxLeapScaleSteps follows generateMelody's unit (a 3rd = 2).
-// shortestNoteSixteenths is the smallest rhythmic grid unit (quarter = 4).
+// shortestNoteSixteenths is the smallest rhythmic grid unit (quarter = 4,
+// sixteenth = 1, thirty-second = 0.5).
 export type GradeParams = {
 	bars: [number, number]; // inclusive min/max
 	timeSignatures: string[];
@@ -24,6 +25,13 @@ export type GradeParams = {
 	articulations: string[];
 	accidentals: AccidentalBreadth;
 	restProbability: number; // 0..1; flat 0.1 across grades — rests aren't a difficulty axis
+	// Multiplies the draw weight of cells containing a 32nd: < 1 makes them rarer,
+	// > 1 more frequent. Omitted = 1 (drawn like any other cell).
+	fineNoteWeight?: number;
+	// Multiplies the draw weight of coarse cells (no note shorter than a quarter):
+	// < 1 makes whole/half/quarter-only bars rarer, so a grade reads more uniformly
+	// busy. Omitted = 1.
+	coarseNoteWeight?: number;
 };
 
 export const gradeDifficulty: Record<Grade, GradeParams> = {
@@ -101,13 +109,15 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 			"5/4",
 		],
 		maxKeyAccidentals: 6,
-		shortestNoteSixteenths: 1,
+		shortestNoteSixteenths: 0.5,
 		maxLeapScaleSteps: 8,
 		tempoBpm: [100, 132],
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "chromatic",
 		restProbability: 0.1,
+		fineNoteWeight: 0.1,
+		coarseNoteWeight: 0.7,
 	},
 	7: {
 		bars: [16, 20],
@@ -124,13 +134,15 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 			"7/8",
 		],
 		maxKeyAccidentals: 7,
-		shortestNoteSixteenths: 1,
+		shortestNoteSixteenths: 0.5,
 		maxLeapScaleSteps: 9,
 		tempoBpm: [100, 144],
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "frequent",
 		restProbability: 0.1,
+		fineNoteWeight: 0.2,
+		coarseNoteWeight: 0.5,
 	},
 	8: {
 		bars: [20, 24],
@@ -148,12 +160,14 @@ export const gradeDifficulty: Record<Grade, GradeParams> = {
 			"5/8",
 		],
 		maxKeyAccidentals: 7,
-		shortestNoteSixteenths: 1,
+		shortestNoteSixteenths: 0.5,
 		maxLeapScaleSteps: 10,
 		tempoBpm: [100, 144],
 		dynamics: ["pp", "p", "mp", "mf", "f", "ff", "cresc", "dim"],
 		articulations: ["slur", "staccato", "accent", "tenuto"],
 		accidentals: "modulation",
 		restProbability: 0.1,
+		fineNoteWeight: 0.35,
+		coarseNoteWeight: 0.3,
 	},
 };

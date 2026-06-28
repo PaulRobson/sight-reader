@@ -83,7 +83,13 @@ export function generateForGrade(
 		acc += ph.durations.length;
 		return s;
 	});
-	const withDynamics = applyDynamics(accented, phraseStarts, p.dynamics, rng);
+	const withDynamics = applyDynamics(
+		accented,
+		phraseStarts,
+		p.dynamics,
+		melody.barUnits,
+		rng,
+	);
 	const notes = applyArticulations(withDynamics, p.articulations, rng);
 	return { ...melody, notes, tempo, timeSignature };
 }

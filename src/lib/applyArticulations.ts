@@ -4,14 +4,9 @@ const LEAP = 2; // semitones; a move > LEAP is a leap, 1..LEAP is a step
 const QUARTER = 4; // sixteenth units
 const MAX_SLUR = 4; // notes per slur, so phrasing reads as groups not one arc
 const ARTIC_PROB = 0.4;
-const MIDDLE_C = 60;
 
-// Grand-staff voices split at middle C; keeping a slur on one side of the split
-// means its "(" and ")" never land on opposite staves (where one becomes a rest).
-const side = (midi: number) => midi >= MIDDLE_C;
-
-// Maximal runs of consecutive sounding notes moving by step on one staff side,
-// chunked to MAX_SLUR so long stepwise passages slur in readable groups.
+// Maximal runs of consecutive sounding notes moving by step, chunked to MAX_SLUR
+// so long stepwise passages slur in readable groups.
 function slurGroups(notes: Note[]): Array<[number, number]> {
 	const groups: Array<[number, number]> = [];
 	const flush = (s: number, e: number) => {
@@ -27,7 +22,6 @@ function slurGroups(notes: Note[]): Array<[number, number]> {
 		const step =
 			!a.rest &&
 			!b.rest &&
-			side(a.midi) === side(b.midi) &&
 			Math.abs(b.midi - a.midi) >= 1 &&
 			Math.abs(b.midi - a.midi) <= LEAP;
 		if (step) {

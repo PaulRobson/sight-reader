@@ -47,13 +47,15 @@ describe("applyArticulations", () => {
 			expect(ends[g] - starts[g] + 1).toBeLessThanOrEqual(4);
 	});
 
-	it("does not slur across the middle-C staff split", () => {
-		// 58,59 (bass side) then 60,61 (treble side): one step crosses the split.
+	it("slurs a stepwise run that spans middle C as one group", () => {
+		// 58,59,60,61: stepwise across middle C. Single-staff render has no split,
+		// so the whole run is one slur.
 		const notes = [at(58), at(59), at(60), at(61)];
 		const out = applyArticulations(notes, ["slur"], mulberry32(1));
-		expect(out[1].slurEnd).toBe(true); // first slur closes before the crossing
-		expect(out[2].slurStart).toBe(true); // a fresh slur opens after it
-		expect(out[0].slurEnd).toBeFalsy();
+		expect(out[0].slurStart).toBe(true);
+		expect(out[3].slurEnd).toBe(true);
+		expect(out[1].slurEnd).toBeFalsy();
+		expect(out[2].slurStart).toBeFalsy();
 	});
 
 	it("places staccato only on detached repeats/leaps, accent only on leaps", () => {

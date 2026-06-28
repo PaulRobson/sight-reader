@@ -145,6 +145,73 @@ describe("toAbc", () => {
 		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
 	});
 
+	it("renders thirty-second notes as /2 lengths and beams them, parsing cleanly", () => {
+		const n = (
+			midi: number,
+			letter: string,
+			duration: number,
+		): Melody["notes"][number] => ({
+			midi,
+			letter,
+			accidental: 0,
+			octave: 4,
+			duration,
+		});
+		const melody: Melody = {
+			key: "C",
+			bars: 1,
+			barUnits: 16,
+			// beat 1: two 32nds + three 16ths; beats 2-4: quarters
+			notes: [
+				n(60, "C", 0.5),
+				n(62, "D", 0.5),
+				n(64, "E", 1),
+				n(65, "F", 1),
+				n(67, "G", 1),
+				n(60, "C", 4),
+				n(60, "C", 4),
+				n(60, "C", 4),
+			],
+		};
+		const abc = toAbc(melody);
+		expect(abc).toContain("C/2D/2EFG"); // 32nds (/2) beamed into the sixteenths
+		expect(abcjs.parseOnly(abc)[0].warnings).toBeUndefined();
+	});
+
+	it("serialises every 32nd-bearing cell in each meter as /2 lengths, parsing cleanly", () => {
+		let saw32 = false;
+		for (const [meter, m] of Object.entries(rhythm.meters)) {
+			for (const cell of m.cells) {
+				if (!cell.durations.some((d) => d < 1)) continue;
+				saw32 = true;
+				const notes = cell.durations.map((d) => ({
+					midi: 60,
+					letter: "C",
+					accidental: 0,
+					octave: 4,
+					duration: d,
+				}));
+				const abc = toAbc(
+					{ key: "C", bars: 1, barUnits: m.barUnits, notes },
+					{ meter },
+				);
+				expect(abc, `${meter}: ${cell.durations}`).toContain("/2");
+				expect(
+					abcjs.parseOnly(abc)[0].warnings,
+					`${meter}: ${cell.durations}`,
+				).toBeUndefined();
+			}
+		}
+		expect(saw32).toBe(true);
+	});
+
+	it("keeps thirty-seconds out of cut time (2/2)", () => {
+		const hasFine = rhythm.meters["2/2"].cells.some((c) =>
+			c.durations.some((d) => d < 1),
+		);
+		expect(hasFine).toBe(false);
+	});
+
 	it("collapses an all-rest bar to a single measure rest", () => {
 		const melody: Melody = {
 			key: "C",

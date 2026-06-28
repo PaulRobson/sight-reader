@@ -23,7 +23,7 @@ describe("applyDynamics", () => {
 	it("marks the first sounding note of each phrase with a vocab word", () => {
 		const notes = line(16);
 		const starts = [0, 4, 8, 12];
-		const out = applyDynamics(notes, starts, ["f", "p"], mulberry32(1));
+		const out = applyDynamics(notes, starts, ["f", "p"], 16, mulberry32(1));
 		for (const s of starts) {
 			expect(out[s].decorations).toHaveLength(1);
 			expect(["f", "p"]).toContain(out[s].decorations?.[0]);
@@ -36,6 +36,7 @@ describe("applyDynamics", () => {
 				line(16),
 				[0, 4, 8, 12],
 				["p", "f"],
+				16,
 				mulberry32(seed),
 			);
 			expect(decosOf(out).some((d) => d.includes("crescendo"))).toBe(false);
@@ -50,6 +51,7 @@ describe("applyDynamics", () => {
 				line(16),
 				[0, 4, 8, 12],
 				["p", "mf", "f", "cresc", "dim"],
+				16,
 				mulberry32(seed),
 			);
 			const decos = decosOf(out);
@@ -65,16 +67,55 @@ describe("applyDynamics", () => {
 		expect(sawHairpin).toBe(true);
 	});
 
+	it("caps a hairpin at two bars and states its destination level", () => {
+		const barUnits = 16; // 4/4, sixteenth units
+		const notes = line(64); // duration-4 notes => 4 per bar, 16 bars
+		const starts = [0, 16, 32, 48]; // four 4-bar phrases
+		const levels = ["pp", "p", "mp", "mf", "f", "ff"];
+		let sawHairpin = false;
+		for (let seed = 1; seed <= 80; seed++) {
+			const out = applyDynamics(
+				notes,
+				starts,
+				["p", "mp", "mf", "f", "cresc", "dim"],
+				barUnits,
+				mulberry32(seed),
+			);
+			for (const kind of ["crescendo", "diminuendo"]) {
+				const opens = out.flatMap((x, i) =>
+					(x.decorations ?? []).includes(`${kind}(`) ? [i] : [],
+				);
+				const closes = out.flatMap((x, i) =>
+					(x.decorations ?? []).includes(`${kind})`) ? [i] : [],
+				);
+				expect(opens.length).toBe(closes.length);
+				for (let k = 0; k < opens.length; k++) {
+					sawHairpin = true;
+					expect(closes[k]).toBeGreaterThan(opens[k]);
+					const span = out
+						.slice(opens[k], closes[k] + 1)
+						.reduce((s, x) => s + x.duration, 0);
+					expect(span).toBeLessThanOrEqual(2 * barUnits);
+					const dest = (out[closes[k]].decorations ?? []).filter((d) =>
+						levels.includes(d),
+					);
+					expect(dest).toHaveLength(1); // a stated destination level
+				}
+			}
+		}
+		expect(sawHairpin).toBe(true);
+	});
+
 	it("skips an all-rest phrase", () => {
 		const notes = line(8).map((n, i) => (i < 4 ? { ...n, rest: true } : n));
-		const out = applyDynamics(notes, [0, 4], ["f", "p"], mulberry32(1));
+		const out = applyDynamics(notes, [0, 4], ["f", "p"], 16, mulberry32(1));
 		expect(out.slice(0, 4).flatMap((x) => x.decorations ?? [])).toHaveLength(0);
 		expect(decosOf(out.slice(4))).not.toHaveLength(0);
 	});
 
 	it("anchors to the first sounding note when a phrase opens on a rest", () => {
 		const notes = line(4).map((n, i) => (i === 0 ? { ...n, rest: true } : n));
-		const out = applyDynamics(notes, [0], ["f"], mulberry32(1));
+		const out = applyDynamics(notes, [0], ["f"], 16, mulberry32(1));
 		expect(out[0].decorations ?? []).toHaveLength(0);
 		expect(out[1].decorations).toEqual(["f"]);
 	});
@@ -84,12 +125,14 @@ describe("applyDynamics", () => {
 			line(16),
 			[0, 4, 8, 12],
 			["p", "f", "cresc"],
+			16,
 			mulberry32(9),
 		);
 		const b = applyDynamics(
 			line(16),
 			[0, 4, 8, 12],
 			["p", "f", "cresc"],
+			16,
 			mulberry32(9),
 		);
 		expect(a).toEqual(b);

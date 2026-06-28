@@ -92,6 +92,16 @@ describe("rhythm grade ramp", () => {
 		expect(finest(rhythm.restrict(rhythm.meters["4/4"], 4))).toBe(4); // quarter+
 		expect(finest(rhythm.restrict(rhythm.meters["4/4"], 2))).toBe(2); // eighths
 		expect(finest(rhythm.restrict(rhythm.meters["4/4"], 1))).toBe(1); // sixteenths
+		expect(finest(rhythm.restrict(rhythm.meters["4/4"], 0.5))).toBe(0.5); // 32nds
+	});
+
+	it("unlocks thirty-seconds only at the 0.5 shortest note, not at the 16th grid", () => {
+		const has32nd = (shortest: number) =>
+			rhythm
+				.restrict(rhythm.meters["4/4"], shortest)
+				.cells.some((c) => c.durations.includes(0.5));
+		expect(has32nd(1)).toBe(false); // grades 5-6 (sixteenth grid) get no 32nds
+		expect(has32nd(0.5)).toBe(true); // grades 7-8 do
 	});
 });
 

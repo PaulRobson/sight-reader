@@ -1,3 +1,4 @@
+import type { Grade } from "./gradeDifficulty.ts";
 import { buildIndices, type GeneratorOptions, stepDelta } from "./pitchWalk.ts";
 import { type Meter, rhythm } from "./rhythm.ts";
 
@@ -8,6 +9,14 @@ import { type Meter, rhythm } from "./rhythm.ts";
 // Repetition is of contour (relative shape), not absolute pitch: phrases join
 // continuously so every melodic interval stays within the grade's maxLeap.
 export type PhraseScheme = "AABA" | "sequence" | "vary";
+
+// Lower grades get the most literal repetition; transposition then free variation
+// come in higher up (§4 step 4: simpler repetition at low grades).
+export function schemeForGrade(grade: Grade): PhraseScheme {
+	if (grade <= 2) return "AABA";
+	if (grade <= 5) return "sequence";
+	return "vary";
+}
 
 // One phrase's material. `connector` is the move from the previous phrase's
 // last note into this phrase's first note (null for the opening phrase).
@@ -89,6 +98,18 @@ function planAABA(a: Contour, args: PlanArgs): PhraseSpan[] {
 			? { ...freshContour(args), connector: stepDelta(args.opts, args.rng) }
 			: { ...a, connector: stepDelta(args.opts, args.rng) },
 	);
+}
+
+// Interior phrase-landing positions (degree 2/5 cadences) in the flattened note
+// stream, which the fast-leap limiter must leave in place to keep the half-cadence.
+export function interiorPhraseEnds(spans: PhraseSpan[]): Set<number> {
+	const ends = new Set<number>();
+	let pos = 0;
+	spans.forEach((span, si) => {
+		pos += span.durations.length;
+		if (si < spans.length - 1) ends.add(pos - 1);
+	});
+	return ends;
 }
 
 // The opening phrase plus its scheme-driven repetitions/sequences.

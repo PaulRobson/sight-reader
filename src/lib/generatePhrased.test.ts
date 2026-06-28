@@ -6,6 +6,7 @@ import {
 	schemeForGrade,
 } from "./generatePhrased.ts";
 import type { Grade } from "./gradeDifficulty.ts";
+import { rhythm } from "./rhythm.ts";
 
 const BASE: Omit<PhrasedOptions, "scheme"> = {
 	seed: 7,
@@ -119,6 +120,33 @@ describe("generatePhrased", () => {
 					expect(Math.abs(d)).toBeLessThanOrEqual(BASE.maxLeap);
 			}
 		}
+	});
+
+	it("limits leaps into a note that follows a 16th/32nd, sparing cadence landings", () => {
+		const meter = rhythm.meters["4/4"]; // carries 16th and 32nd cells
+		let sawFastPair = false;
+		for (let seed = 1; seed <= 60; seed++) {
+			const r = generatePhrased(
+				opts("vary", { seed, meter, maxLeap: 10, stepBias: 0.25 }),
+			);
+			const ns = r.melody.notes;
+			// cadence landings the limiter leaves alone: interior ends + final two
+			const spared = new Set<number>([ns.length - 1, ns.length - 2]);
+			let pos = 0;
+			r.phrases.forEach((s, si) => {
+				pos += s.durations.length;
+				if (si < r.phrases.length - 1) spared.add(pos - 1);
+			});
+			for (let i = 1; i < ns.length; i++) {
+				if (spared.has(i) || ns[i - 1].duration > 1) continue;
+				sawFastPair = true;
+				expect(
+					Math.abs(ns[i].midi - ns[i - 1].midi),
+					`seed ${seed} note ${i}`,
+				).toBeLessThanOrEqual(5);
+			}
+		}
+		expect(sawFastPair).toBe(true);
 	});
 
 	it("collapses to a single phrase when only one fits", () => {

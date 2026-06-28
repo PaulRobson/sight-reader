@@ -4,13 +4,13 @@ import type { AccidentalBreadth } from "./gradeDifficulty.ts";
 // Per-note probability of a chromatic inflection, by §5 accidental breadth.
 const BREADTH_PROBABILITY: Record<AccidentalBreadth, number> = {
 	none: 0,
-	rare: 0.03,
-	passing: 0.06,
-	occasional: 0.1,
-	regular: 0.15,
-	chromatic: 0.2,
-	frequent: 0.28,
-	modulation: 0.35,
+	rare: 0.02,
+	passing: 0.03,
+	occasional: 0.05,
+	regular: 0.08,
+	chromatic: 0.12,
+	frequent: 0.16,
+	modulation: 0.2,
 };
 
 type AccidentalArgs = {
