@@ -17,17 +17,14 @@ describe("beatSpecFromAbc", () => {
 		expect(beatSpecFromAbc(abc("2/4", 60))?.beatsPerBar).toBe(2);
 	});
 
-	it("feels compound metres in dotted-quarter beats", () => {
-		// 6/8 at quarter=90 -> dotted quarter = 1.5 quarters = 1s; two beats/bar.
-		expect(beatSpecFromAbc(abc("6/8", 90))).toEqual({
-			secondsPerBeat: 1,
-			beatsPerBar: 2,
+	it("counts every eighth in x/8 metres (6/8 = six, not two)", () => {
+		// 6/8 at quarter=120 -> eighth = 0.5 quarters = 0.25s; six beats/bar.
+		expect(beatSpecFromAbc(abc("6/8", 120))).toEqual({
+			secondsPerBeat: 0.25,
+			beatsPerBar: 6,
 		});
-		expect(beatSpecFromAbc(abc("9/8", 90))?.beatsPerBar).toBe(3);
-		expect(beatSpecFromAbc(abc("12/8", 90))?.beatsPerBar).toBe(4);
-	});
-
-	it("counts non-compound eighth metres in eighths", () => {
+		expect(beatSpecFromAbc(abc("9/8", 120))?.beatsPerBar).toBe(9);
+		expect(beatSpecFromAbc(abc("12/8", 120))?.beatsPerBar).toBe(12);
 		expect(beatSpecFromAbc(abc("3/8", 120))).toEqual({
 			secondsPerBeat: 0.25,
 			beatsPerBar: 3,
