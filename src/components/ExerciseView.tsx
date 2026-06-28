@@ -1,5 +1,6 @@
 import abcjs, { type TuneObject } from "abcjs";
 import { useEffect, useRef } from "react";
+import { barsPerLine } from "../lib/barsPerLine.ts";
 import { debounce } from "../lib/debounce.ts";
 import {
 	type AudioStatus,
@@ -34,10 +35,16 @@ export function ExerciseView({ abc, midiTranspose }: Props) {
 		// drag collapses to one re-layout.
 		const render = () => {
 			const width = el.clientWidth || 720;
+			const finePointer =
+				window.matchMedia?.("(pointer: fine)").matches ?? false;
 			const tunes = abcjs.renderAbc(el, abc, {
 				responsive: "resize",
 				staffwidth: width,
-				wrap: { minSpacing: 1.8, maxSpacing: 2.7, preferredMeasuresPerLine: 4 },
+				wrap: {
+					minSpacing: 1.8,
+					maxSpacing: 2.7,
+					preferredMeasuresPerLine: barsPerLine(width, finePointer),
+				},
 			});
 			visualObjRef.current = tunes[0] ?? null;
 		};
