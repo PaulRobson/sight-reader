@@ -173,7 +173,7 @@ Hardcoded target throughout this slice: Piano, treble, grade 1, 4/4, C major, 4 
 - [ ] `[manual]` The attempt metronome counts in one bar then clicks steadily at tempo.
 
 ### Slice 6 — Dynamics & articulation (§4 step 5)
-- [ ] `[test]` Dynamics layer: phrase-start markings, grade-gated; serializer emits the correct abc decorations (`!p!`, `!f!`, `!crescendo(!`, …).
+- [x] `[test]` Dynamics layer: phrase-start markings, grade-gated; serializer emits the correct abc decorations (`!p!`, `!f!`, `!crescendo(!`, …). **Done:** `applyDynamics` places one marking from the grade's `dynamics` vocabulary at each phrase's first sounding note — static words (`p`..`ff`) as a single decoration, `cresc`/`dim` as a hairpin opening there and closing on the phrase's last sounding note; the opening phrase is always a static level and all-rest phrases are skipped. Phrase-start indices come from each `PhraseSpan`'s note count (length-preserved through rest/accidental insertion). `Note.decorations` carries abc tokens; `noteStream` wraps them `!…!` (and `splitGrandStaff` drops them on the mirrored rest so a dynamic never doubles). Tested: placement, grade gating (no hairpins where the vocab lacks them), hairpin open/close pairing, rest anchoring, determinism, plus generateForGrade output serialising + parsing warning-free.
 - [ ] `[test]` Articulation layer: slurs / staccato / accent / tenuto, grade-gated.
 
 **Manual checkpoints (end of slice):**

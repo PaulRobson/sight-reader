@@ -11,6 +11,7 @@ export type Note = {
 	octave: number;
 	duration: number; // sixteenth-note units
 	rest?: boolean; // slot is silent; pitch fields retained for walk continuity
+	decorations?: string[]; // abc decoration tokens (e.g. "f", "crescendo("), no !!
 };
 
 export type Melody = {

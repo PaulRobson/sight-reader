@@ -1,3 +1,4 @@
+import { applyDynamics } from "./applyDynamics.ts";
 import type { Melody } from "./generateMelody.ts";
 import { generatePhrased, schemeForGrade } from "./generatePhrased.ts";
 import { type Grade, gradeDifficulty } from "./gradeDifficulty.ts";
@@ -47,7 +48,7 @@ export function generateForGrade(
 	const stepBias = Math.max(0.5, 0.9 - (args.grade - 1) * 0.05);
 	const key = args.key ?? keys.pick(p.maxKeyAccidentals, rng);
 
-	const { melody } = generatePhrased({
+	const { melody, phrases } = generatePhrased({
 		seed: args.seed,
 		key,
 		bars,
@@ -65,7 +66,7 @@ export function generateForGrade(
 		melody.barUnits,
 	);
 	const scalePitchClasses = new Set(scale.major(key).map((d) => d.pitchClass));
-	const notes = insertAccidentals(
+	const accented = insertAccidentals(
 		rested,
 		p.accidentals,
 		{
@@ -75,5 +76,14 @@ export function generateForGrade(
 		},
 		rng,
 	);
+	// Note count per phrase = its span's durations length, so cumulative sums give
+	// the phrase-start indices into the (length-preserved) note stream.
+	let acc = 0;
+	const phraseStarts = phrases.map((ph) => {
+		const s = acc;
+		acc += ph.durations.length;
+		return s;
+	});
+	const notes = applyDynamics(accented, phraseStarts, p.dynamics, rng);
 	return { ...melody, notes, tempo, timeSignature };
 }

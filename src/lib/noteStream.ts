@@ -28,12 +28,18 @@ function pitchLetters(note: Note): string {
 // An explicit accidental is emitted only when the note deviates from what's
 // currently in force (key signature, or an earlier accidental this bar), and
 // that deviation is recorded in `bar` so it persists to the bar line.
+function decorations(note: Note): string {
+	return note.decorations?.map((d) => `!${d}!`).join("") ?? "";
+}
+
 function noteToken(
 	note: Note,
 	keySig: Record<string, number>,
 	bar: Record<string, number>,
 ): string {
-	if (note.rest) return note.duration === 1 ? "z" : `z${note.duration}`;
+	const deco = decorations(note);
+	if (note.rest)
+		return `${deco}${note.duration === 1 ? "z" : `z${note.duration}`}`;
 	const id = `${note.letter}${note.octave}`;
 	const inForce = id in bar ? bar[id] : (keySig[note.letter] ?? 0);
 	let prefix = "";
@@ -42,7 +48,7 @@ function noteToken(
 		bar[id] = note.accidental;
 	}
 	const length = note.duration === 1 ? "" : `${note.duration}`;
-	return `${prefix}${pitchLetters(note)}${length}`;
+	return `${deco}${prefix}${pitchLetters(note)}${length}`;
 }
 
 // Sixteenths per beam group: a quarter for simple meters, a dotted quarter for
@@ -111,7 +117,11 @@ export function splitGrandStaff(notes: Note[]): {
 	treble: Note[];
 	bass: Note[];
 } {
-	const rest = (n: Note): Note => ({ ...n, rest: true });
+	const rest = (n: Note): Note => ({
+		...n,
+		rest: true,
+		decorations: undefined,
+	});
 	return {
 		treble: notes.map((n) => (!n.rest && n.midi >= MIDDLE_C ? n : rest(n))),
 		bass: notes.map((n) => (!n.rest && n.midi < MIDDLE_C ? n : rest(n))),
