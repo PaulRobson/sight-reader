@@ -8,6 +8,11 @@ import { rhythm } from "./rhythm.ts";
 // so every rhythm slot reads as one notehead on the line, no pitch to decode.
 const FIXED_PITCH = { midi: 71, letter: "B", accidental: 0, octave: 4 };
 
+// Woodblock (GM 116, 0-based 115 — abcjs "woodblock" sample). A near-pitchless
+// percussion click for the reference, so rhythm-only plays rhythm without pitch
+// (§8), not the melodic instrument's timbre.
+export const RHYTHM_GM_PROGRAM = 115;
+
 // Rhythm-only mode (§8): reuse the grade's rhythm-cell draw, skip pitch
 // assignment, fix every note to one pitch. Key is C (no signature to read) and
 // no dynamics/articulation/accidentals — those are melodic concerns.

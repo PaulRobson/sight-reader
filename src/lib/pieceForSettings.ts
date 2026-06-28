@@ -1,5 +1,5 @@
 import { generateForGrade } from "./generateForGrade.ts";
-import { generateRhythm } from "./generateRhythm.ts";
+import { generateRhythm, RHYTHM_GM_PROGRAM } from "./generateRhythm.ts";
 import type { Grade } from "./gradeDifficulty.ts";
 import {
 	type Clef,
@@ -77,7 +77,7 @@ export function pieceForSettings(settings: Settings, seed: number): string {
 			tempo: r.tempo,
 			meter: r.timeSignature,
 			percussion: true,
-			program: instrument.gmProgram,
+			program: RHYTHM_GM_PROGRAM,
 		});
 	}
 	const grandStaff = isGrandStaff(instrument);

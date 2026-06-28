@@ -72,7 +72,7 @@ describe("pieceForSettings", () => {
 		}
 	});
 
-	it("renders rhythm-only mode as a single-line percussion staff", () => {
+	it("renders rhythm-only mode as a single-line percussion staff with a woodblock timbre", () => {
 		for (const instrumentId of ["piano", "flute", "guitar"]) {
 			for (let seed = 1; seed <= 3; seed++) {
 				const abc = pieceForSettings(
@@ -81,6 +81,10 @@ describe("pieceForSettings", () => {
 				);
 				expect(abc).toContain("clef=perc stafflines=1");
 				expect(abc).not.toContain("%%score"); // never a grand staff, even for piano
+				// the only timbre is woodblock, never the instrument's melodic one (§8)
+				expect(abc.match(/^%%MIDI program \d+$/gm)).toEqual([
+					"%%MIDI program 115",
+				]);
 				expect(
 					abcjs.parseOnly(abc)[0].warnings,
 					`${instrumentId} s${seed}`,
