@@ -3,10 +3,11 @@ import { beatSpecFromAbc } from "./beatSpecFromAbc.ts";
 import { useMetronome } from "./useMetronome.ts";
 import type { View } from "./useViewState.ts";
 
-// Drives the attempt metronome (§7) from view state: clicks through the playNow
-// state when enabled, silent otherwise. Returns arm(), which the caller invokes
-// inside the Let's go gesture so iOS audio is unlocked before the start() that
-// fires at the (non-gesture) countdown-zero transition.
+// Drives the attempt metronome (§7) from view state: on entering playNow it
+// plays a one-bar count-in (when enabled), and the cleanup stops it if the view
+// leaves mid-count. Returns arm(), which the caller invokes inside the Let's go
+// gesture so iOS audio is unlocked before the start() that fires at the
+// (non-gesture) countdown-zero transition.
 export function useAttemptMetronome(
 	view: View,
 	abc: string,

@@ -18,8 +18,8 @@ function click(ctx: AudioContext, time: number, accent: boolean) {
 	osc.stop(time + CLICK_S);
 }
 
-// Attempt metronome (§7): an accented downbeat each bar with plain clicks
-// between, so the first bar reads as the count-in before the steady click.
+// Attempt metronome (§7): a one-bar count-in (accented downbeat, plain clicks
+// after) that then stops, so the student plays the piece unaccompanied.
 // arm() must run inside a user gesture (Let's go) to unlock iOS audio, because
 // start() fires at the countdown-zero transition, which is not a gesture.
 export function useMetronome() {
@@ -48,12 +48,18 @@ export function useMetronome() {
 			ctx.resume().catch(() => undefined);
 			let beat = 0;
 			let next = ctx.currentTime + 0.1;
+			// One bar only: queue beats 0..beatsPerBar-1, then stop the scheduler.
+			// Already-queued clicks still sound on the audio clock after stop().
 			const tick = () => {
-				while (next < ctx.currentTime + SCHEDULE_AHEAD_S) {
-					click(ctx, next, beat % spec.beatsPerBar === 0);
+				while (
+					beat < spec.beatsPerBar &&
+					next < ctx.currentTime + SCHEDULE_AHEAD_S
+				) {
+					click(ctx, next, beat === 0);
 					next += spec.secondsPerBeat;
 					beat += 1;
 				}
+				if (beat >= spec.beatsPerBar) stop();
 			};
 			tick();
 			timerRef.current = setInterval(tick, LOOKAHEAD_MS);
